@@ -4,7 +4,7 @@ import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.InvokeCallback;
 import haidnor.remoting.RPCHook;
 import haidnor.remoting.common.Pair;
-import haidnor.remoting.common.RemotingHelper;
+import haidnor.remoting.util.RemotingHelper;
 import haidnor.remoting.common.SemaphoreReleaseOnlyOnce;
 import haidnor.remoting.common.ServiceThread;
 import haidnor.remoting.exception.RemotingSendRequestException;
@@ -208,8 +208,7 @@ public abstract class NettyRemotingAbstract {
             };
 
             if (pair.getObject1().rejectRequest()) {
-                final RemotingCommand response = RemotingCommand.createResponse(RemotingSysResponseCode.SYSTEM_BUSY,
-                        "[REJECTREQUEST]system busy, start flow control for a while");
+                final RemotingCommand response = RemotingCommand.createResponse(RemotingSysResponseCode.SYSTEM_BUSY, "[REJECTREQUEST]system busy, start flow control for a while");
                 response.setOpaque(opaque);
                 ctx.writeAndFlush(response);
                 return;

@@ -1,4 +1,4 @@
-package haidnor.remoting.common;
+package haidnor.remoting.util;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;

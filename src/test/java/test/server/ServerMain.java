@@ -4,6 +4,7 @@ import haidnor.remoting.core.NettyRemotingServer;
 import haidnor.remoting.core.NettyRequestProcessor;
 import haidnor.remoting.core.NettyServerConfig;
 import haidnor.remoting.protocol.RemotingCommand;
+import haidnor.remoting.util.RemotingHelper;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.charset.StandardCharsets;
@@ -16,14 +17,16 @@ public class ServerMain {
         NettyServerConfig nettyServerConfig = new NettyServerConfig();
         NettyRemotingServer server = new NettyRemotingServer(nettyServerConfig);
 
+        server.start();
+
         ExecutorService executorService = Executors.newFixedThreadPool(5);
         server.registerProcessor(1, new NettyRequestProcessor() {
             @Override
             public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
+                String clientAddr = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                 System.out.println("服务器端接收到了请求,消息内容: " + new String(request.getBody()));
 
-                RemotingCommand response = RemotingCommand.createResponse(1, "remark");
-                response.setBody("好的".getBytes(StandardCharsets.UTF_8));
+                RemotingCommand response = RemotingCommand.createResponse("好的".getBytes(StandardCharsets.UTF_8));
                 return response;
             }
 
@@ -32,8 +35,6 @@ public class ServerMain {
                 return false;
             }
         }, executorService);
-
-        server.start();
 
     }
 

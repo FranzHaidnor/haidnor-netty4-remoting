@@ -76,6 +76,13 @@ public class RemotingCommand {
         return cmd;
     }
 
+
+    public static RemotingCommand createResponse(byte[] body) {
+        RemotingCommand response = createResponse(RemotingSysResponseCode.SYSTEM_ERROR, "not set any response code", null);
+        response.setBody(body);
+        return response;
+    }
+
     public static RemotingCommand createResponse(Class<? extends CommandCustomHeader> classHeader) {
         return createResponse(RemotingSysResponseCode.SYSTEM_ERROR, "not set any response code", classHeader);
     }

@@ -1,4 +1,4 @@
-package haidnor.remoting.common;
+package haidnor.remoting.util;
 
 import haidnor.remoting.exception.RemotingConnectException;
 import haidnor.remoting.exception.RemotingSendRequestException;
@@ -15,9 +15,6 @@ import java.nio.channels.SocketChannel;
 
 @Slf4j
 public class RemotingHelper {
-    public static final String ROCKETMQ_REMOTING = "RocketmqRemoting";
-    public static final String DEFAULT_CHARSET = "UTF-8";
-
 
     public static String exceptionSimpleDesc(final Throwable e) {
         StringBuilder sb = new StringBuilder();

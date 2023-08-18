@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>haidnor</groupId>
-    <artifactId>haidnor-netty4-remoting-starter</artifactId>
+    <artifactId>haidnor-netty4-remoting</artifactId>
     <version>1.0</version>
 
     <properties>
@@ -15,14 +15,6 @@
     </properties>
 
     <dependencies>
-        <!-- https://github.com/redisson/redisson/tree/master/redisson-spring-boot-starter#spring-boot-starter -->
-        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
         <dependency>
             <groupId>io.netty</groupId>
@@ -61,17 +53,5 @@
 
     </dependencies>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.0.2</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
 </project>

@@ -26,29 +26,29 @@ public class ClientMain {
             RemotingCommand response = client.invokeSync(request);
             System.out.println(response);
 
-            RemotingCommand response2 = client.invokeSync(request, 1000);
-            System.out.println(response2);
+//            RemotingCommand response2 = client.invokeSync(request, 1000);
+//            System.out.println(response2);
         }
-
-        // 异步发送
-        {
-            // 默认超时时间 5000ms
-            client.invokeAsync(request, responseFuture -> {
-                RemotingCommand response = responseFuture.getResponseCommand();
-                System.out.println("服务端响应:" + new String(response.getBody()));
-            });
-
-            client.invokeAsync(request, 500, responseFuture -> {
-                RemotingCommand response = responseFuture.getResponseCommand();
-                System.out.println("服务端响应:" + new String(response.getBody()));
-            });
-        }
-
-        // 发送后不管
-        {
-            client.invokeOneway(request);
-            client.invokeOneway(request, 5000);
-        }
+//
+//        // 异步发送
+//        {
+//            // 默认超时时间 5000ms
+//            client.invokeAsync(request, responseFuture -> {
+//                RemotingCommand response = responseFuture.getResponseCommand();
+//                System.out.println("服务端响应:" + new String(response.getBody()));
+//            });
+//
+//            client.invokeAsync(request, 500, responseFuture -> {
+//                RemotingCommand response = responseFuture.getResponseCommand();
+//                System.out.println("服务端响应:" + new String(response.getBody()));
+//            });
+//        }
+//
+//        // 发送后不管
+//        {
+//            client.invokeOneway(request);
+//            client.invokeOneway(request, 5000);
+//        }
 
     }
 

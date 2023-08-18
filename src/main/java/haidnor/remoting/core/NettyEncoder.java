@@ -1,7 +1,7 @@
 package haidnor.remoting.core;
 
-import haidnor.remoting.common.RemotingHelper;
-import haidnor.remoting.common.RemotingUtil;
+import haidnor.remoting.util.RemotingHelper;
+import haidnor.remoting.util.RemotingUtil;
 import haidnor.remoting.protocol.RemotingCommand;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
