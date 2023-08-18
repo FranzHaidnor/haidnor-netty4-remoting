@@ -60,29 +60,29 @@ public class RemotingCommand {
         COMMAND_REGISTRAR.register(command);
     }
 
-    public static RemotingCommand creatRequest(String command, CommandCustomHeader customHeader) {
+    public static <T extends Enum<T>> RemotingCommand creatRequest(T commandEnum, CommandCustomHeader customHeader) {
         RemotingCommand cmd = new RemotingCommand();
-        cmd.command = command;
-        cmd.setCode(command.hashCode());
+        cmd.command = commandEnum.name();
+        cmd.setCode(commandEnum.name().hashCode());
         cmd.customHeader = customHeader;
         cmd.setVersion(configVersion);
         return cmd;
     }
 
-    public static RemotingCommand creatRequest(String command, CommandCustomHeader customHeader, byte[] body) {
+    public static <T extends Enum<T>> RemotingCommand creatRequest(T commandEnum, CommandCustomHeader customHeader, byte[] body) {
         RemotingCommand cmd = new RemotingCommand();
-        cmd.command = command;
-        cmd.setCode(command.hashCode());
+        cmd.command = commandEnum.name();
+        cmd.setCode(commandEnum.name().hashCode());
         cmd.customHeader = customHeader;
         cmd.body = body;
         cmd.setVersion(configVersion);
         return cmd;
     }
 
-    public static RemotingCommand creatRequest(String command, byte[] body) {
+    public static <T extends Enum<T>> RemotingCommand creatRequest(T commandEnum, byte[] body) {
         RemotingCommand cmd = new RemotingCommand();
-        cmd.command = command;
-        cmd.setCode(command.hashCode());
+        cmd.command = commandEnum.name();
+        cmd.setCode(commandEnum.name().hashCode());
         cmd.body = body;
         cmd.setVersion(configVersion);
         return cmd;

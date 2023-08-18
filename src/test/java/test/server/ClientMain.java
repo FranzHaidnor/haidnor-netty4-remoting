@@ -1,5 +1,6 @@
 package test.server;
 
+import haidnor.remoting.RemotingClient;
 import haidnor.remoting.core.NettyClientConfig;
 import haidnor.remoting.core.NettyRemotingClient;
 import haidnor.remoting.exception.RemotingConnectException;
@@ -14,11 +15,11 @@ public class ClientMain {
 
     public static void main(String[] args) throws RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException, InterruptedException, RemotingTooMuchRequestException {
 
-        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig("127.0.0.1:8080"), Command.class);
+        RemotingClient client = new NettyRemotingClient(new NettyClientConfig("127.0.0.1:8080"), Command.class);
 
-        RemotingCommand request = RemotingCommand.creatRequest(Command.SERVER_HELLO.name(), "Hello,World".getBytes(StandardCharsets.UTF_8));
+        RemotingCommand request = RemotingCommand.creatRequest(Command.SERVER_HELLO, "Hello,World".getBytes(StandardCharsets.UTF_8));
         // 含有自定义请求头的消息
-        RemotingCommand request2 = RemotingCommand.creatRequest(Command.SERVER_HELLO.name(), new CommandHeader("31", 18), "Hello,World".getBytes(StandardCharsets.UTF_8));
+        RemotingCommand request2 = RemotingCommand.creatRequest(Command.SERVER_HELLO, new CommandHeader("31", 18), "Hello,World".getBytes(StandardCharsets.UTF_8));
 
         // 同步发送
         {
