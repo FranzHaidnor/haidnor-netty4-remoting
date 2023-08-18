@@ -4,14 +4,15 @@ import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.InvokeCallback;
 import haidnor.remoting.RPCHook;
 import haidnor.remoting.RemotingServer;
+import haidnor.remoting.common.CommandRegistrar;
 import haidnor.remoting.common.Pair;
-import haidnor.remoting.util.RemotingHelper;
-import haidnor.remoting.util.RemotingUtil;
 import haidnor.remoting.common.TlsMode;
 import haidnor.remoting.exception.RemotingSendRequestException;
 import haidnor.remoting.exception.RemotingTimeoutException;
 import haidnor.remoting.exception.RemotingTooMuchRequestException;
 import haidnor.remoting.protocol.RemotingCommand;
+import haidnor.remoting.util.RemotingHelper;
+import haidnor.remoting.util.RemotingUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -29,6 +30,7 @@ import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.security.cert.CertificateException;
 import java.util.NoSuchElementException;
@@ -41,6 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class NettyRemotingServer extends NettyRemotingAbstract implements RemotingServer {
+    private final CommandRegistrar commandRegistrar = new CommandRegistrar();
 
     private final NettyServerConfig serverConfig;
     private static final String HANDSHAKE_HANDLER_NAME = "handshakeHandler";
@@ -50,7 +53,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     private final EventLoopGroup eventLoopGroupSelector;
     private final EventLoopGroup eventLoopGroupBoss;
     private final ExecutorService publicExecutor;
-    private final ChannelEventListener channelEventListener;
+    private ChannelEventListener channelEventListener;
     private final Timer timer = new Timer("ServerHouseKeepingService", true);
     private DefaultEventExecutorGroup defaultEventExecutorGroup;
     private int port = 0;
@@ -61,15 +64,17 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     private final NettyConnectManageHandler connectionManageHandler = new NettyConnectManageHandler();
     private final NettyServerHandler serverHandler = new NettyServerHandler();
 
-    public NettyRemotingServer(final NettyServerConfig serverConfig) {
-        this(serverConfig, null);
-    }
-
-    public NettyRemotingServer(final NettyServerConfig serverConfig, final ChannelEventListener channelEventListener) {
+    public <T extends Enum<T>> NettyRemotingServer(final NettyServerConfig serverConfig, Class<T> command) {
         super(serverConfig.getServerOnewaySemaphoreValue(), serverConfig.getServerAsyncSemaphoreValue());
+
+        // 注册接口
+        Field[] fields = command.getFields();
+        for (Field field : fields) {
+            commandRegistrar.register(field.getName());
+        }
+
         this.serverBootstrap = new ServerBootstrap();
         this.serverConfig = serverConfig;
-        this.channelEventListener = channelEventListener;
 
         int publicThreadNums = serverConfig.getServerCallbackExecutorThreads();
         if (publicThreadNums <= 0) {
@@ -151,6 +156,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         int serverWorkerThreads = serverConfig.getServerWorkerThreads();
         ThreadFactory threadFactory = new ThreadFactory() {
             private final AtomicInteger threadIndex = new AtomicInteger(0);
+
             @Override
             public Thread newThread(Runnable r) {
                 return new Thread(r, "NettyServerCodecThread_" + this.threadIndex.incrementAndGet());
@@ -163,7 +169,6 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                 .channel(useEpoll() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024)
                 .option(ChannelOption.SO_REUSEADDR, true)
-                .option(ChannelOption.SO_KEEPALIVE, false)
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.SO_SNDBUF, serverConfig.getServerSocketSndBufSize())
                 .childOption(ChannelOption.SO_RCVBUF, serverConfig.getServerSocketRcvBufSize())
@@ -173,23 +178,23 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                     public void initChannel(SocketChannel ch) {
                         ch.pipeline()
                                 // InboundHandler
-                                 .addLast(defaultEventExecutorGroup, HANDSHAKE_HANDLER_NAME, handshakeHandler)
+                                .addLast(defaultEventExecutorGroup, HANDSHAKE_HANDLER_NAME, handshakeHandler)
+                                // DuplexHandler 连接空闲检测处理器 120s 没有读写将会被触发
+                                .addLast(defaultEventExecutorGroup, new IdleStateHandler(0, 0, serverConfig.getServerChannelMaxIdleTimeSeconds()))
+                                .addLast(defaultEventExecutorGroup, connectionManageHandler)
                                 // OutboundHandler 编码器
                                 .addLast(defaultEventExecutorGroup, nettyEncoder)
                                 // InboundHandler 解码器 ByteBuf > RemotingCommand
                                 .addLast(defaultEventExecutorGroup, new NettyDecoder())
-                                // DuplexHandler 连接空闲检测处理器 120s 没有读写将会被触发
-                                .addLast(defaultEventExecutorGroup, new IdleStateHandler(0, 0, serverConfig.getServerChannelMaxIdleTimeSeconds()))
-                                .addLast(defaultEventExecutorGroup, connectionManageHandler)
                                 // InboundHandler
                                 .addLast(defaultEventExecutorGroup, serverHandler);
                     }
                 });
 
+
         if (serverConfig.isServerPooledByteBufAllocatorEnable()) {
             this.serverBootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         }
-
         try {
             ChannelFuture sync = this.serverBootstrap.bind().sync();
             InetSocketAddress addr = (InetSocketAddress) sync.channel().localAddress();
@@ -239,6 +244,10 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    public void registerChannelEventListener(ChannelEventListener channelEventListener) {
+        this.channelEventListener = channelEventListener;
+    }
+
     @Override
     public void registerRPCHook(RPCHook rpcHook) {
         if (rpcHook != null && !rpcHooks.contains(rpcHook)) {
@@ -247,14 +256,14 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     }
 
     @Override
-    public void registerProcessor(int requestCode, NettyRequestProcessor processor, ExecutorService executor) {
+    public <T extends Enum<T>> void registerProcessor(T commandEnum, NettyRequestProcessor processor, ExecutorService executor) {
         ExecutorService executorThis = executor;
         if (null == executor) {
             executorThis = this.publicExecutor;
         }
 
         Pair<NettyRequestProcessor, ExecutorService> pair = new Pair<>(processor, executorThis);
-        this.processorTable.put(requestCode, pair);
+        this.processorTable.put(commandEnum.name().hashCode(), pair);
     }
 
     @Override
@@ -406,6 +415,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                 if (event.state().equals(IdleState.ALL_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                     log.warn("NETTY SERVER PIPELINE: IDLE exception [{}]", remoteAddress);
+                    // 主动关闭客户端连接
                     RemotingUtil.closeChannel(ctx.channel());
                     if (NettyRemotingServer.this.channelEventListener != null) {
                         NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.IDLE, remoteAddress, ctx.channel()));

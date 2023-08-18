@@ -11,14 +11,14 @@ import haidnor.remoting.protocol.RemotingCommand;
 import java.nio.charset.StandardCharsets;
 
 public class ClientMain {
+
     public static void main(String[] args) throws RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException, InterruptedException, RemotingTooMuchRequestException {
 
-        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig("127.0.0.1:8080"));
+        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig("127.0.0.1:8080"), Command.class);
 
-        RemotingCommand request = RemotingCommand.creatRequest(1, "Hello,World".getBytes(StandardCharsets.UTF_8));
-
+        RemotingCommand request = RemotingCommand.creatRequest(Command.SERVER_HELLO.name(), "Hello,World".getBytes(StandardCharsets.UTF_8));
         // 含有自定义请求头的消息
-        RemotingCommand request2 = RemotingCommand.creatRequest(1, new CommandHeader("31", 18), "Hello,World".getBytes(StandardCharsets.UTF_8));
+        RemotingCommand request2 = RemotingCommand.creatRequest(Command.SERVER_HELLO.name(), new CommandHeader("31", 18), "Hello,World".getBytes(StandardCharsets.UTF_8));
 
         // 同步发送
         {

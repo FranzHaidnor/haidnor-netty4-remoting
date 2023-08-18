@@ -4,14 +4,15 @@ import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.InvokeCallback;
 import haidnor.remoting.RPCHook;
 import haidnor.remoting.RemotingClient;
+import haidnor.remoting.common.CommandRegistrar;
 import haidnor.remoting.common.Pair;
-import haidnor.remoting.util.RemotingHelper;
-import haidnor.remoting.util.RemotingUtil;
 import haidnor.remoting.exception.RemotingConnectException;
 import haidnor.remoting.exception.RemotingSendRequestException;
 import haidnor.remoting.exception.RemotingTimeoutException;
 import haidnor.remoting.exception.RemotingTooMuchRequestException;
 import haidnor.remoting.protocol.RemotingCommand;
+import haidnor.remoting.util.RemotingHelper;
+import haidnor.remoting.util.RemotingUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -24,6 +25,7 @@ import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.SocketAddress;
 import java.security.cert.CertificateException;
 import java.util.Map;
@@ -37,6 +39,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class NettyRemotingClient extends NettyRemotingAbstract implements RemotingClient {
+
+    private final CommandRegistrar commandRegistrar = new CommandRegistrar();
 
     private static final long LOCK_TIMEOUT_MILLIS = 3000;
 
@@ -62,7 +66,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
 
     private final ExecutorService publicExecutor;
 
-    private final ChannelEventListener channelEventListener;
+    private ChannelEventListener channelEventListener;
 
     /**
      * Invoke the callback methods in this executor when process response.
@@ -71,14 +75,19 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
 
     private DefaultEventExecutorGroup defaultEventExecutorGroup;
 
-    public NettyRemotingClient(final NettyClientConfig nettyClientConfig) {
-        this(nettyClientConfig, null);
+    public <T extends Enum<T>> NettyRemotingClient(NettyClientConfig nettyClientConfig, Class<T> command) {
+        this(nettyClientConfig);
+
+        // 注册接口
+        Field[] fields = command.getFields();
+        for (Field field : fields) {
+            commandRegistrar.register(field.getName());
+        }
     }
 
-    public NettyRemotingClient(final NettyClientConfig nettyClientConfig, final ChannelEventListener channelEventListener) {
+    public NettyRemotingClient(final NettyClientConfig nettyClientConfig) {
         super(nettyClientConfig.getClientOnewaySemaphoreValue(), nettyClientConfig.getClientAsyncSemaphoreValue());
         this.nettyClientConfig = nettyClientConfig;
-        this.channelEventListener = channelEventListener;
 
         int publicThreadNums = nettyClientConfig.getClientCallbackExecutorThreads();
         if (publicThreadNums <= 0) {
@@ -302,6 +311,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
 
     @Override
     public RemotingCommand invokeSync(RemotingCommand request) throws InterruptedException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException {
+        commandRegistrar.checkCommandHash(request.getCommand());
         return invokeSync(request, nettyClientConfig.getTimeoutMillis());
     }
 

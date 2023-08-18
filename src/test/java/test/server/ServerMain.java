@@ -1,10 +1,12 @@
 package test.server;
 
+import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.core.NettyRemotingServer;
 import haidnor.remoting.core.NettyRequestProcessor;
 import haidnor.remoting.core.NettyServerConfig;
 import haidnor.remoting.protocol.RemotingCommand;
 import haidnor.remoting.util.RemotingHelper;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.charset.StandardCharsets;
@@ -14,20 +16,39 @@ import java.util.concurrent.Executors;
 public class ServerMain {
 
     public static void main(String[] args) {
-        NettyServerConfig nettyServerConfig = new NettyServerConfig();
-        NettyRemotingServer server = new NettyRemotingServer(nettyServerConfig);
+        NettyRemotingServer server = new NettyRemotingServer(new NettyServerConfig(), Command.class);
 
-        server.start();
+        ChannelEventListener eventListener = new ChannelEventListener() {
+            @Override
+            public void onChannelConnect(String remoteAddr, Channel channel) {
+                System.out.println("onChannelConnect");
+            }
+
+            @Override
+            public void onChannelClose(String remoteAddr, Channel channel) {
+                System.out.println("onChannelClose");
+            }
+
+            @Override
+            public void onChannelException(String remoteAddr, Channel channel) {
+                System.out.println("onChannelException");
+            }
+
+            @Override
+            public void onChannelIdle(String remoteAddr, Channel channel) {
+                System.out.println("onChannelIdle");
+            }
+        };
+        server.registerChannelEventListener(eventListener);
+
 
         ExecutorService executorService = Executors.newFixedThreadPool(5);
-        server.registerProcessor(1, new NettyRequestProcessor() {
+        server.registerProcessor(Command.SERVER_HELLO, new NettyRequestProcessor() {
             @Override
             public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
                 String clientAddr = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                 System.out.println("服务器端接收到了请求,消息内容: " + new String(request.getBody()));
-
-                RemotingCommand response = RemotingCommand.createResponse("好的".getBytes(StandardCharsets.UTF_8));
-                return response;
+                return RemotingCommand.createResponse("好的".getBytes(StandardCharsets.UTF_8));
             }
 
             @Override
@@ -35,6 +56,8 @@ public class ServerMain {
                 return false;
             }
         }, executorService);
+
+        server.start();
 
     }
 

@@ -4,6 +4,7 @@ package haidnor.remoting.protocol;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import haidnor.remoting.CommandCustomHeader;
 import haidnor.remoting.annotation.CFNotNull;
+import haidnor.remoting.common.CommandRegistrar;
 import haidnor.remoting.exception.RemotingCommandException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,6 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class RemotingCommand {
+
+    private static final CommandRegistrar COMMAND_REGISTRAR = new CommandRegistrar();
 
     private static final int RPC_TYPE = 0; // 0, REQUEST_COMMAND
     private static final int RPC_ONEWAY = 1; // 0, RPC
@@ -37,7 +40,9 @@ public class RemotingCommand {
     private static final AtomicInteger requestId = new AtomicInteger(0);
     private static final SerializeType serializeTypeConfigInThisServer = SerializeType.JSON;
 
-    private int code;
+    private String command;
+    private int commandHashCode;
+
     private LanguageCode language = LanguageCode.JAVA;
     private SerializeType serializeTypeCurrentRPC = serializeTypeConfigInThisServer;
     private int version = 0;
@@ -51,26 +56,33 @@ public class RemotingCommand {
     protected RemotingCommand() {
     }
 
-    public static RemotingCommand creatRequest(int code, CommandCustomHeader customHeader) {
+    public static void registerClientCommand(String command) {
+        COMMAND_REGISTRAR.register(command);
+    }
+
+    public static RemotingCommand creatRequest(String command, CommandCustomHeader customHeader) {
         RemotingCommand cmd = new RemotingCommand();
-        cmd.setCode(code);
+        cmd.command = command;
+        cmd.setCode(command.hashCode());
         cmd.customHeader = customHeader;
         cmd.setVersion(configVersion);
         return cmd;
     }
 
-    public static RemotingCommand creatRequest(int code, CommandCustomHeader customHeader, byte[] body) {
+    public static RemotingCommand creatRequest(String command, CommandCustomHeader customHeader, byte[] body) {
         RemotingCommand cmd = new RemotingCommand();
-        cmd.setCode(code);
+        cmd.command = command;
+        cmd.setCode(command.hashCode());
         cmd.customHeader = customHeader;
         cmd.body = body;
         cmd.setVersion(configVersion);
         return cmd;
     }
 
-    public static RemotingCommand creatRequest(int code, byte[] body) {
+    public static RemotingCommand creatRequest(String command, byte[] body) {
         RemotingCommand cmd = new RemotingCommand();
-        cmd.setCode(code);
+        cmd.command = command;
+        cmd.setCode(command.hashCode());
         cmd.body = body;
         cmd.setVersion(configVersion);
         return cmd;
@@ -409,12 +421,16 @@ public class RemotingCommand {
         return (this.flag & bits) == bits;
     }
 
+    public String getCommand() {
+        return command;
+    }
+
     public int getCode() {
-        return code;
+        return commandHashCode;
     }
 
     public void setCode(int code) {
-        this.code = code;
+        this.commandHashCode = code;
     }
 
     @JsonIgnore
@@ -497,7 +513,7 @@ public class RemotingCommand {
 
     @Override
     public String toString() {
-        return "RemotingCommand [code=" + code + ", language=" + language + ", version=" + version + ", opaque=" + opaque + ", flag(B)="
+        return "RemotingCommand [code=" + commandHashCode + ", language=" + language + ", version=" + version + ", opaque=" + opaque + ", flag(B)="
                 + Integer.toBinaryString(flag) + ", remark=" + remark + ", extFields=" + extFields + ", serializeTypeCurrentRPC="
                 + serializeTypeCurrentRPC + "]";
     }
