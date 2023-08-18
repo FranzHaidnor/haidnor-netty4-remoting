@@ -17,13 +17,12 @@ public class ServerMain {
         NettyRemotingServer server = new NettyRemotingServer(nettyServerConfig);
 
         ExecutorService executorService = Executors.newFixedThreadPool(5);
-
         server.registerProcessor(1, new NettyRequestProcessor() {
             @Override
             public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
                 System.out.println("服务器端接收到了请求,消息内容: " + new String(request.getBody()));
 
-                RemotingCommand response = RemotingCommand.createResponseCommand(1, "remark");
+                RemotingCommand response = RemotingCommand.createResponse(1, "remark");
                 response.setBody("好的".getBytes(StandardCharsets.UTF_8));
                 return response;
             }
@@ -35,6 +34,7 @@ public class ServerMain {
         }, executorService);
 
         server.start();
+
     }
 
 }

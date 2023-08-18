@@ -14,24 +14,42 @@ public class ClientMain {
     public static void main(String[] args) throws RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException, InterruptedException, RemotingTooMuchRequestException {
 
         NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig("127.0.0.1:8080"));
-        client.start();
 
-//        RemotingCommand request = RemotingCommand.createRequestCommand(1, new CommandHeader("张三", 18), "Hello,World".getBytes(StandardCharsets.UTF_8));
+        RemotingCommand request = RemotingCommand.creatRequest(1, "Hello,World".getBytes(StandardCharsets.UTF_8));
 
-        RemotingCommand request = RemotingCommand.createRequestCommand(1, "Hello,World".getBytes(StandardCharsets.UTF_8));
+        // 含有自定义请求头的消息
+        RemotingCommand request2 = RemotingCommand.creatRequest(1, new CommandHeader("31", 18), "Hello,World".getBytes(StandardCharsets.UTF_8));
 
         // 同步发送
-        RemotingCommand command = client.invokeSync(request, 1000);
-        System.out.println(command);
+        {
+            // 默认超时时间 5000ms
+            RemotingCommand response = client.invokeSync(request);
+            System.out.println(response);
+
+            RemotingCommand response2 = client.invokeSync(request, 1000);
+            System.out.println(response2);
+        }
 
         // 异步发送
-        client.invokeAsync(request, 500, responseFuture -> {
-            RemotingCommand response = responseFuture.getResponseCommand();
-            System.out.println("服务端响应:" + new String(command.getBody()));
-        });
+        {
+            // 默认超时时间 5000ms
+            client.invokeAsync(request, responseFuture -> {
+                RemotingCommand response = responseFuture.getResponseCommand();
+                System.out.println("服务端响应:" + new String(response.getBody()));
+            });
+
+            client.invokeAsync(request, 500, responseFuture -> {
+                RemotingCommand response = responseFuture.getResponseCommand();
+                System.out.println("服务端响应:" + new String(response.getBody()));
+            });
+        }
 
         // 发送后不管
-        client.invokeOneway(request, 5000);
+        {
+            client.invokeOneway(request);
+            client.invokeOneway(request, 5000);
+        }
+
     }
 
 }
