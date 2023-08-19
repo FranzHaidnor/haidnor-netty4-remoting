@@ -14,7 +14,7 @@ public enum LanguageCode {
     PHP((byte) 10),
     OMS((byte) 11);
 
-    private byte code;
+    private final byte code;
 
     LanguageCode(byte code) {
         this.code = code;
