@@ -244,6 +244,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    @Override
     public void registerChannelEventListener(ChannelEventListener channelEventListener) {
         this.channelEventListener = channelEventListener;
     }

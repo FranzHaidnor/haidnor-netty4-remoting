@@ -8,4 +8,5 @@ public interface RemotingService {
 
     void registerRPCHook(RPCHook rpcHook);
 
+    void registerChannelEventListener(ChannelEventListener channelEventListener);
 }

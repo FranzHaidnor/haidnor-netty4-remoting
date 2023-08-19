@@ -1,36 +1,48 @@
 package test.server;
 
-import haidnor.remoting.RemotingClient;
+import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.core.NettyClientConfig;
 import haidnor.remoting.core.NettyRemotingClient;
-import haidnor.remoting.exception.RemotingConnectException;
-import haidnor.remoting.exception.RemotingSendRequestException;
-import haidnor.remoting.exception.RemotingTimeoutException;
 import haidnor.remoting.protocol.RemotingCommand;
+import io.netty.channel.Channel;
+import lombok.SneakyThrows;
 
 public class ClientDemo {
 
+    @SneakyThrows
     public static void main(String[] args) {
-        // 参数1:客户端配置类 参数2:服务端地址 参数3:指令枚举
-        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
+        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
 
-        // 构建请求消息体
+        ChannelEventListener eventListener = new ChannelEventListener() {
+            @Override
+            public void onChannelConnect(String remoteAddr, Channel channel) {
+                System.out.println("onChannelConnect");
+            }
+
+            @Override
+            public void onChannelClose(String remoteAddr, Channel channel) {
+                System.out.println("onChannelClose");
+            }
+
+            @Override
+            public void onChannelException(String remoteAddr, Channel channel) {
+                System.out.println("onChannelException");
+            }
+
+            @Override
+            public void onChannelIdle(String remoteAddr, Channel channel) {
+                System.out.println("onChannelIdle");
+            }
+        };
+        client.registerChannelEventListener(eventListener);
+
+
         RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
+        RemotingCommand response = client.invokeSync(request);
 
-        try {
-            // 同步发送请求
-            RemotingCommand response = client.invokeSync(request);
 
-        } catch (InterruptedException e) {
-            // do something
-        } catch (RemotingConnectException e) {
-            // do something
-        } catch (RemotingSendRequestException e) {
-            // do something
-        } catch (RemotingTimeoutException e) {
-            // do something
-        }
 
+        client.invokeOneway(request);
     }
 
 }

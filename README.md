@@ -1,7 +1,8 @@
 # haidnor-netty4-remoting
-基于 RocketMQ Remoting 模块源码二次开发，用于快速构建 Netty Server / Client。
+基于 RocketMQ(4.9.1) Remoting 模块源码二次开发，用于快速构建 Netty Server / Client。
 
-# maven pom 文件配置
+# 配置
+maven pom.xml
 ```xml
 <dependency>
     <groupId>haidnor</groupId>
@@ -11,8 +12,8 @@
 ```
 
 # 快速使用
-## 约定客户端-服务端请求命令
-要求有一个自定义枚举，枚举名称没有要求，无需有任何属性字段。haidnor-netty4-remoting 将会使用使用枚举中的类型，作为服务端与客户端通信的接口路径。
+## 约定请求命令
+客户端与服务端和要求有一个公用的自定义枚举，定义彼此通信的端点。（枚举名称没有要求，不需要任何属性字段）。
 
 原理：客户端和服务端会解析枚举类型名称的 hashCode 值，将其作为请求指令互相传递，因此有可能会出现 hashCode 冲突。
 所以在构建服务端与客户端时需要将自定义的指令枚举作为构造参数传入，以检验是否存在枚举类型名称有 hashCode 冲突，若发生 hashCode 冲突，服务端或客户端将会无法启动，并且提示哪些枚举类型的名称需要修改。
@@ -23,7 +24,7 @@ public enum Command {
     GET_SERVER_INFO,
     
     // 获取客户端信息
-    GET_CLIENT_INFO;
+    GET_CLIENT_INFO
 }
 ```
 ## 构建服务端
@@ -79,6 +80,190 @@ public class ClientDemo {
             // do something
         }
 
+    }
+
+}
+```
+# 服务端 API 与特性
+## 注册通道事件监听器
+```java
+public class ServerDemo {
+
+    public static void main(String[] args) {
+        NettyRemotingServer server = new NettyRemotingServer(new NettyServerConfig(), Command.class);
+
+        // 通道事件监听器
+        ChannelEventListener eventListener = new ChannelEventListener() {
+            @Override
+            public void onChannelConnect(String remoteAddr, Channel channel) {
+                System.out.println("onChannelConnect");
+            }
+
+            @Override
+            public void onChannelClose(String remoteAddr, Channel channel) {
+                System.out.println("onChannelClose");
+            }
+
+            @Override
+            public void onChannelException(String remoteAddr, Channel channel) {
+                System.out.println("onChannelException");
+            }
+
+            @Override
+            public void onChannelIdle(String remoteAddr, Channel channel) {
+                System.out.println("onChannelIdle");
+            }
+        };
+        // 注册通道事件监听器
+        server.registerChannelEventListener(eventListener);
+
+        server.start();
+    }
+
+}
+```
+## 注册事件处理器钩子方法
+```java
+public class ServerDemo {
+
+    public static void main(String[] args) {
+        NettyRemotingServer server = new NettyRemotingServer(new NettyServerConfig(), Command.class);
+
+
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        server.registerProcessor(Command.GET_SERVER_INFO, (ctx, request) -> RemotingCommand.createResponse("OK".getBytes(StandardCharsets.UTF_8)), executorService);
+
+        RPCHook hook1 = new RPCHook() {
+            @Override
+            public void doBeforeRequest(String remoteAddr, RemotingCommand request) {
+                // do something
+            }
+
+            @Override
+            public void doAfterResponse(String remoteAddr, RemotingCommand request, RemotingCommand response) {
+                // do something
+            }
+        };
+        server.registerRPCHook(hook1);
+
+        RPCHook hook2 = new RPCHook() {
+            @Override
+            public void doBeforeRequest(String remoteAddr, RemotingCommand request) {
+                // do something
+            }
+
+            @Override
+            public void doAfterResponse(String remoteAddr, RemotingCommand request, RemotingCommand response) {
+                // do something
+            }
+        };
+        server.registerRPCHook(hook2);
+
+        server.start();
+    }
+    
+}
+```
+服务端支持为 NettyRequestProcessor 添加多个前后置处理器。 以上代码在处理 `Command.GET_SERVER_INFO` 指令时会先依次执行 hook1、hook2 的 `doBeforeRequest()` 方法，NettyRequestProcessor 执行完以后再依次执行 hook1、hook2 的 `doAfterResponse()` 方法。
+
+# 客户端 API 与特性
+## 同步请求、异步请求、单向请求
+```java
+public class ClientDemo {
+
+    @SneakyThrows
+    public static void main(String[] args) {
+        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
+
+        RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
+
+        // 同步请求
+        RemotingCommand response1 = client.invokeSync(request);
+
+        // 异步请求
+        client.invokeAsync(request, responseFuture -> {
+            RemotingCommand response = responseFuture.getResponseCommand();
+        });
+
+        // 单向请求 （无返回结果）
+        client.invokeOneway(request);
+    }
+
+}
+```
+
+## 注册请求钩子方法
+```java
+public class ClientDemo {
+
+    @SneakyThrows
+    public static void main(String[] args) {
+        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
+
+        RPCHook hook1 = new RPCHook() {
+            @Override
+            public void doBeforeRequest(String remoteAddr, RemotingCommand request) {
+                // do something
+            }
+
+            @Override
+            public void doAfterResponse(String remoteAddr, RemotingCommand request, RemotingCommand response) {
+                // do something
+            }
+        };
+        client.registerRPCHook(hook1);
+
+        RPCHook hook2 = new RPCHook() {
+            @Override
+            public void doBeforeRequest(String remoteAddr, RemotingCommand request) {
+                // do something
+            }
+
+            @Override
+            public void doAfterResponse(String remoteAddr, RemotingCommand request, RemotingCommand response) {
+                // do something
+            }
+        };
+        client.registerRPCHook(hook2);
+
+        RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
+        RemotingCommand response = client.invokeSync(request);
+    }
+
+}
+```
+客户端支持为请求方法添加多个前后置处理器。 以上代码执行 `client.invokeSync(request)` 请求时会先依次执行 hook1、hook2 的 `doBeforeRequest()` 方法，请求执行完以后再依次执行 hook1、hook2 的 `doAfterResponse()` 方法。若客户端发送但向请求 `invokeOneway()` 则不会回调执行 `doAfterResponse()` 方法
+
+## 注册通道事件监听器
+```java
+public class ClientDemo {
+
+    @SneakyThrows
+    public static void main(String[] args) {
+        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
+
+        ChannelEventListener eventListener = new ChannelEventListener() {
+            @Override
+            public void onChannelConnect(String remoteAddr, Channel channel) {
+                System.out.println("onChannelConnect");
+            }
+
+            @Override
+            public void onChannelClose(String remoteAddr, Channel channel) {
+                System.out.println("onChannelClose");
+            }
+
+            @Override
+            public void onChannelException(String remoteAddr, Channel channel) {
+                System.out.println("onChannelException");
+            }
+
+            @Override
+            public void onChannelIdle(String remoteAddr, Channel channel) {
+                System.out.println("onChannelIdle");
+            }
+        };
+        client.registerChannelEventListener(eventListener);
     }
 
 }

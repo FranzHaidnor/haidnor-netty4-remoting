@@ -1,12 +1,11 @@
 package test.server;
 
-import haidnor.remoting.RemotingServer;
+import haidnor.remoting.ChannelEventListener;
+import haidnor.remoting.RPCHook;
 import haidnor.remoting.core.NettyRemotingServer;
-import haidnor.remoting.core.NettyRequestProcessor;
 import haidnor.remoting.core.NettyServerConfig;
 import haidnor.remoting.protocol.RemotingCommand;
-import haidnor.remoting.util.RemotingHelper;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
@@ -15,23 +14,61 @@ import java.util.concurrent.Executors;
 public class ServerDemo {
 
     public static void main(String[] args) {
-        // 参数1:服务端配置参数 参数2:指令枚举
-        RemotingServer server = new NettyRemotingServer(new NettyServerConfig(), Command.class);
+        NettyRemotingServer server = new NettyRemotingServer(new NettyServerConfig(), Command.class);
 
-        // 处理请求的线程池
-        ExecutorService executorService = Executors.newFixedThreadPool(4);
-
-        // 注册指令处理器
-        server.registerProcessor(Command.GET_SERVER_INFO, new NettyRequestProcessor() {
+        ChannelEventListener eventListener = new ChannelEventListener() {
             @Override
-            public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws Exception {
-                String clientAddr = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-                System.out.println("服务器端接收到了请求 SERVER_HELLO,消息内容: " + new String(request.getBody()));
-                return RemotingCommand.createResponse("好的".getBytes(StandardCharsets.UTF_8));
+            public void onChannelConnect(String remoteAddr, Channel channel) {
+                System.out.println("onChannelConnect");
             }
-        }, executorService);
 
-        // 服务器启动
+            @Override
+            public void onChannelClose(String remoteAddr, Channel channel) {
+                System.out.println("onChannelClose");
+            }
+
+            @Override
+            public void onChannelException(String remoteAddr, Channel channel) {
+                System.out.println("onChannelException");
+            }
+
+            @Override
+            public void onChannelIdle(String remoteAddr, Channel channel) {
+                System.out.println("onChannelIdle");
+            }
+        };
+        server.registerChannelEventListener(eventListener);
+
+
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        server.registerProcessor(Command.GET_SERVER_INFO, (ctx, request) -> RemotingCommand.createResponse("OK".getBytes(StandardCharsets.UTF_8)), executorService);
+
+        RPCHook hook1 = new RPCHook() {
+            @Override
+            public void doBeforeRequest(String remoteAddr, RemotingCommand request) {
+                // do something
+            }
+
+            @Override
+            public void doAfterResponse(String remoteAddr, RemotingCommand request, RemotingCommand response) {
+                // do something
+            }
+        };
+        server.registerRPCHook(hook1);
+
+        RPCHook hook2 = new RPCHook() {
+            @Override
+            public void doBeforeRequest(String remoteAddr, RemotingCommand request) {
+                // do something
+            }
+
+            @Override
+            public void doAfterResponse(String remoteAddr, RemotingCommand request, RemotingCommand response) {
+                // do something
+            }
+        };
+        server.registerRPCHook(hook2);
+
         server.start();
     }
 

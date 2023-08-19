@@ -268,6 +268,11 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    @Override
+    public void registerChannelEventListener(ChannelEventListener channelEventListener) {
+        this.channelEventListener = channelEventListener;
+    }
+
     public void closeChannel(final Channel channel) {
         if (null == channel) {
             return;
