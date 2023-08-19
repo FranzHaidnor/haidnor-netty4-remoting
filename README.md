@@ -1,4 +1,4 @@
-# haidnor -netty4-remoting
+# haidnor-netty4-remoting
 基于 RocketMQ(4.9.1) Remoting 模块源码二次开发，用于快速构建 Netty Server / Client。
 
 # 1 版本要求与配置
