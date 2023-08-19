@@ -41,7 +41,10 @@ public class RemotingCommand {
     private static final SerializeType serializeTypeConfigInThisServer = SerializeType.JSON;
 
     private String command;
-    private int commandHashCode;
+    /**
+     * command hashCode
+     */
+    private int code;
 
     private LanguageCode language = LanguageCode.JAVA;
     private SerializeType serializeTypeCurrentRPC = serializeTypeConfigInThisServer;
@@ -99,22 +102,35 @@ public class RemotingCommand {
     }
 
 
-    public static RemotingCommand createResponse(byte[] body) {
-        RemotingCommand response = createResponse(RemotingSysResponseCode.SYSTEM_ERROR, "not set any response code", null);
-        response.setBody(body);
-        return response;
+    // createResponse --------------------------------------------------------------------------------------------------
+
+    public static RemotingCommand createResponse(int code) {
+        return createResponse(code, null, null, null);
     }
 
-    public static RemotingCommand createResponse(Class<? extends CommandCustomHeader> classHeader) {
-        return createResponse(RemotingSysResponseCode.SYSTEM_ERROR, "not set any response code", classHeader);
+    public static RemotingCommand createResponse(int code, String remark) {
+        return createResponse(code, remark, null, null);
     }
 
-    public static RemotingCommand createResponse(int code, String remark, Class<? extends CommandCustomHeader> classHeader) {
+    public static RemotingCommand createResponse(int code, Class<? extends CommandCustomHeader> classHeader) {
+        return createResponse(code, null, classHeader, null);
+    }
+
+    public static RemotingCommand createResponse(int code, byte[] body) {
+        return createResponse(code, null, null, body);
+    }
+
+    public static RemotingCommand createResponse(int code, String remark, byte[] body) {
+        return createResponse(code, remark, null, body);
+    }
+
+    public static RemotingCommand createResponse(int code, String remark, Class<? extends CommandCustomHeader> classHeader, byte[] body) {
         RemotingCommand cmd = new RemotingCommand();
         cmd.markResponseType();
         cmd.setCode(code);
         cmd.setRemark(remark);
         cmd.setVersion(configVersion);
+        cmd.setBody(body);
 
         if (classHeader != null) {
             try {
@@ -128,9 +144,7 @@ public class RemotingCommand {
         return cmd;
     }
 
-    public static RemotingCommand createResponse(int code, String remark) {
-        return createResponse(code, remark, null);
-    }
+    // createResponse --------------------------------------------------------------------------------------------------
 
     public static RemotingCommand decode(final byte[] array) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(array);
@@ -436,11 +450,11 @@ public class RemotingCommand {
     }
 
     public int getCode() {
-        return commandHashCode;
+        return code;
     }
 
     protected void setCode(int code) {
-        this.commandHashCode = code;
+        this.code = code;
     }
 
     @JsonIgnore
@@ -523,7 +537,7 @@ public class RemotingCommand {
 
     @Override
     public String toString() {
-        return "RemotingCommand [code=" + commandHashCode + ", language=" + language + ", version=" + version + ", opaque=" + opaque + ", flag(B)="
+        return "RemotingCommand [code=" + code + ", language=" + language + ", version=" + version + ", opaque=" + opaque + ", flag(B)="
                 + Integer.toBinaryString(flag) + ", remark=" + remark + ", extFields=" + extFields + ", serializeTypeCurrentRPC="
                 + serializeTypeCurrentRPC + "]";
     }

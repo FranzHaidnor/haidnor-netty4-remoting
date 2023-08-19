@@ -7,7 +7,6 @@ import haidnor.remoting.core.NettyServerConfig;
 import haidnor.remoting.protocol.RemotingCommand;
 import io.netty.channel.Channel;
 
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -41,7 +40,7 @@ public class ServerDemo {
 
 
         ExecutorService executorService = Executors.newFixedThreadPool(4);
-        server.registerProcessor(Command.GET_SERVER_INFO, (ctx, request) -> RemotingCommand.createResponse("OK".getBytes(StandardCharsets.UTF_8)), executorService);
+//        server.registerProcessor(Command.GET_SERVER_INFO, (ctx, request) -> RemotingCommand.createResponse("OK".getBytes(StandardCharsets.UTF_8)), executorService);
 
         RPCHook hook1 = new RPCHook() {
             @Override
