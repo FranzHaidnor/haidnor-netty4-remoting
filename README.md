@@ -1,8 +1,11 @@
 # haidnor -netty4-remoting
 基于 RocketMQ(4.9.1) Remoting 模块源码二次开发，用于快速构建 Netty Server / Client。
 
-# 1 配置
-maven pom.xml
+# 1 版本要求与配置
+## JDK 版本要求
+要求 JDK 17 以上 
+
+## maven pom.xml 配置
 ```xml
 <dependency>
     <groupId>haidnor</groupId>
@@ -131,9 +134,6 @@ public class RemotingCommandDemo {
 
 }
 ```
-
-## 2.5 构建响应消息 API
-
 
 # 3 服务端 API 与特性
 ## 3.1 注册通道事件监听器
