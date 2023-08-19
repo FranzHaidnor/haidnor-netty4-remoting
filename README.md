@@ -84,6 +84,56 @@ public class ClientDemo {
 
 }
 ```
+## 构建请求、响应消息 API
+```java
+public class RemotingCommandDemo {
+
+    public static void main(String[] args) {
+        // 自定义消息头
+        CommandCustomHeader header = new CommandCustomHeader() {
+            private String param1 = "A";
+            public String getParam1() {
+                return param1;
+            }
+            public void setParam1(String param1) {
+                this.param1 = param1;
+            }
+            @Override
+            public void checkFields() {
+
+            }
+        };
+
+        // 自定义消息体
+        byte[] body = "body".getBytes(StandardCharsets.UTF_8);
+
+        // 构建请求 -------------------------------------------------------------------------------------------------------
+        RemotingCommand request1 = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
+        request1.setRemark("remark");
+        request1.setFlag(1);
+        request1.setLanguage(LanguageCode.JAVA);
+
+        RemotingCommand request2 = RemotingCommand.creatRequest(Command.GET_SERVER_INFO, body);
+
+        RemotingCommand request3 = RemotingCommand.creatRequest(Command.GET_SERVER_INFO, body);
+
+        RemotingCommand request4 = RemotingCommand.creatRequest(Command.GET_SERVER_INFO, header, body);
+
+        // 构建响应 -------------------------------------------------------------------------------------------------------
+        RemotingCommand response1 = RemotingCommand.createResponse(body);
+        response1.setRemark("remark");
+        response1.setFlag(1);
+        response1.setLanguage(LanguageCode.JAVA);
+
+        RemotingCommand response2 = RemotingCommand.creatRequest(Command.GET_SERVER_INFO, header, body);
+    }
+
+}
+```
+
+## 构建响应消息 API
+
+
 # 服务端 API 与特性
 ## 注册通道事件监听器
 ```java
@@ -179,14 +229,19 @@ public class ClientDemo {
 
         // 同步请求
         RemotingCommand response1 = client.invokeSync(request);
+        RemotingCommand response2 = client.invokeSync(request, 1000); // 设置超时时间 1000 毫秒 (默认值 5000 毫秒)
 
         // 异步请求
         client.invokeAsync(request, responseFuture -> {
             RemotingCommand response = responseFuture.getResponseCommand();
         });
+        client.invokeAsync(request, 1000, responseFuture -> {  // 设置超时时间 1000 毫秒 (默认值 5000 毫秒)
+            RemotingCommand response = responseFuture.getResponseCommand();
+        });
 
         // 单向请求 （无返回结果）
         client.invokeOneway(request);
+        client.invokeOneway(request,1000); // 设置超时时间 1000 毫秒 (默认值 5000 毫秒)
     }
 
 }

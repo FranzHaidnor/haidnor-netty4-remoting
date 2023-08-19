@@ -439,7 +439,7 @@ public class RemotingCommand {
         return commandHashCode;
     }
 
-    public void setCode(int code) {
+    protected void setCode(int code) {
         this.commandHashCode = code;
     }
 
