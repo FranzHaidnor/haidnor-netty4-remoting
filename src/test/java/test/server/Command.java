@@ -1,5 +1,9 @@
 package test.server;
 
 public enum Command {
-    SERVER_HELLO;
+
+    GET_SERVER_INFO,
+
+    GET_CLIENT_INFO;
+
 }

@@ -60,6 +60,16 @@ public class RemotingCommand {
         COMMAND_REGISTRAR.register(command);
     }
 
+
+    public static <T extends Enum<T>> RemotingCommand creatRequest(T commandEnum) {
+        RemotingCommand cmd = new RemotingCommand();
+        cmd.command = commandEnum.name();
+        cmd.setCode(commandEnum.name().hashCode());
+        cmd.setVersion(configVersion);
+        return cmd;
+    }
+
+
     public static <T extends Enum<T>> RemotingCommand creatRequest(T commandEnum, CommandCustomHeader customHeader) {
         RemotingCommand cmd = new RemotingCommand();
         cmd.command = commandEnum.name();

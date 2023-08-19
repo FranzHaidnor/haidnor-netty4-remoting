@@ -7,7 +7,6 @@ import lombok.Setter;
 @Setter
 public class NettyClientConfig {
 
-    private final String serverAddress;
     /**
      * Worker thread number
      */
@@ -28,9 +27,5 @@ public class NettyClientConfig {
     private boolean clientPooledByteBufAllocatorEnable = false;
     private boolean clientCloseSocketIfTimeout = true;
     private boolean useTLS;
-
-    public NettyClientConfig(String serverAddress) {
-        this.serverAddress = serverAddress;
-    }
 
 }
