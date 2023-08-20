@@ -22,6 +22,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -318,14 +319,16 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    @SneakyThrows
     @Override
-    public RemotingCommand invokeSync(RemotingCommand request) throws InterruptedException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException {
+    public RemotingCommand invokeSync(RemotingCommand request) {
         commandRegistrar.checkCommandHash(request.getCommand());
         return invokeSync(request, nettyClientConfig.getTimeoutMillis());
     }
 
+    @SneakyThrows
     @Override
-    public RemotingCommand invokeSync(final RemotingCommand request, long timeoutMillis) throws InterruptedException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException {
+    public RemotingCommand invokeSync(final RemotingCommand request, long timeoutMillis) {
         start();
 
         long beginStartTime = System.currentTimeMillis();
@@ -358,8 +361,9 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    @SneakyThrows
     @Override
-    public void invokeAsync(RemotingCommand request, InvokeCallback invokeCallback) throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+    public void invokeAsync(RemotingCommand request, InvokeCallback invokeCallback) {
         invokeAsync(request, nettyClientConfig.getTimeoutMillis(), invokeCallback);
     }
 
@@ -428,9 +432,9 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         return null;
     }
 
+    @SneakyThrows
     @Override
-    public void invokeAsync(RemotingCommand request, long timeoutMillis, InvokeCallback invokeCallback)
-            throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+    public void invokeAsync(RemotingCommand request, long timeoutMillis, InvokeCallback invokeCallback) {
         start();
         long beginStartTime = System.currentTimeMillis();
         final Channel channel = this.getAndCreateChannel(addr);
@@ -453,13 +457,15 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    @SneakyThrows
     @Override
-    public void invokeOneway(RemotingCommand request) throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+    public void invokeOneway(RemotingCommand request) {
         invokeOneway(request, nettyClientConfig.getTimeoutMillis());
     }
 
+    @SneakyThrows
     @Override
-    public void invokeOneway(RemotingCommand request, long timeoutMillis) throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+    public void invokeOneway(RemotingCommand request, long timeoutMillis)  {
         start();
         final Channel channel = this.getAndCreateChannel(addr);
         if (channel != null && channel.isActive()) {
