@@ -153,7 +153,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
                                     defaultEventExecutorGroup,
                                     new NettyEncoder(),
                                     new NettyDecoder(),
-                                    new IdleStateHandler(0, 0, nettyClientConfig.getClientChannelMaxIdleTimeSeconds()),
+                                    new IdleStateHandler(nettyClientConfig.getClientChannelMaxReaderIdleTimeSeconds(), nettyClientConfig.getClientChannelMaxWriterIdleTimeSeconds(), nettyClientConfig.getClientChannelMaxAllIdleTimeSeconds()),
                                     new NettyConnectManageHandler(),
                                     new NettyClientHandler());
                         }
@@ -572,7 +572,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                     log.debug("NETTY CLIENT PIPELINE: IDLE [{}]", remoteAddress);
                     if (NettyRemotingClient.this.channelEventListener != null) {
-                        NettyRemotingClient.this.putNettyEvent(new NettyEvent(NettyEventType.IDLE, remoteAddress, ctx.channel()));
+                        NettyRemotingClient.this.putNettyEvent(new NettyEvent(NettyEventType.ALL_IDLE, remoteAddress, ctx.channel()));
                     }
                 }
             }

@@ -180,7 +180,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                                 // InboundHandler
                                 .addLast(defaultEventExecutorGroup, HANDSHAKE_HANDLER_NAME, handshakeHandler)
                                 // DuplexHandler 连接空闲检测处理器 120s 没有读写将会被触发
-                                .addLast(defaultEventExecutorGroup, new IdleStateHandler(0, 0, serverConfig.getServerChannelMaxIdleTimeSeconds()))
+                                .addLast(defaultEventExecutorGroup, new IdleStateHandler(serverConfig.getServerChannelMaxReaderIdleTimeSeconds(), serverConfig.getServerChannelMaxWriterIdleTimeSeconds(), serverConfig.getServerChannelMaxAllIdleTimeSeconds()))
                                 .addLast(defaultEventExecutorGroup, connectionManageHandler)
                                 // OutboundHandler 编码器
                                 .addLast(defaultEventExecutorGroup, nettyEncoder)
@@ -413,13 +413,23 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
             if (evt instanceof IdleStateEvent event) {
-                if (event.state().equals(IdleState.ALL_IDLE)) {
+                if (event.state().equals(IdleState.READER_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-                    log.warn("NETTY SERVER PIPELINE: IDLE exception [{}]", remoteAddress);
-                    // 主动关闭客户端连接
-                    RemotingUtil.closeChannel(ctx.channel());
+                    log.warn("NETTY SERVER PIPELINE: READER_IDLE [{}]", remoteAddress);
                     if (NettyRemotingServer.this.channelEventListener != null) {
-                        NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.IDLE, remoteAddress, ctx.channel()));
+                        NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.READER_IDLE, remoteAddress, ctx.channel()));
+                    }
+                } else if (event.state().equals(IdleState.WRITER_IDLE)) {
+                    final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
+                    log.warn("NETTY SERVER PIPELINE: WRITER_IDLE [{}]", remoteAddress);
+                    if (NettyRemotingServer.this.channelEventListener != null) {
+                        NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.WRITER_IDLE, remoteAddress, ctx.channel()));
+                    }
+                } else if (event.state().equals(IdleState.ALL_IDLE)) {
+                    final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
+                    log.warn("NETTY SERVER PIPELINE: IDLE [{}]", remoteAddress);
+                    if (NettyRemotingServer.this.channelEventListener != null) {
+                        NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.ALL_IDLE, remoteAddress, ctx.channel()));
                     }
                 }
             }

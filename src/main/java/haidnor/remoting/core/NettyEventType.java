@@ -3,6 +3,8 @@ package haidnor.remoting.core;
 public enum NettyEventType {
     CONNECT,
     CLOSE,
-    IDLE,
+    READER_IDLE,
+    WRITER_IDLE,
+    ALL_IDLE,
     EXCEPTION
 }

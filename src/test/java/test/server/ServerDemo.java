@@ -32,7 +32,7 @@ public class ServerDemo {
             }
 
             @Override
-            public void onChannelIdle(String remoteAddr, Channel channel) {
+            public void onChannelAllIdle(String remoteAddr, Channel channel) {
                 System.out.println("onChannelIdle");
             }
         };

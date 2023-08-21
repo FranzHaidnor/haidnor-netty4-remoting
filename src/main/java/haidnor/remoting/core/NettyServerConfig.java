@@ -12,7 +12,23 @@ public class NettyServerConfig {
     private int serverSelectorThreads = 3;
     private int serverOnewaySemaphoreValue = 256;
     private int serverAsyncSemaphoreValue = 64;
-    private int serverChannelMaxIdleTimeSeconds = 120;
+
+    /**
+     * IdleStateEvent will be triggered when neither read nor write was performed for
+     * the specified period of this time. Specify {@code 0} to disable
+     */
+    private int serverChannelMaxReaderIdleTimeSeconds = 0;
+    /**
+     * IdleStateEvent will be triggered when neither read nor write was performed for
+     * the specified period of this time. Specify {@code 0} to disable
+     */
+    private int serverChannelMaxWriterIdleTimeSeconds = 0;
+    /**
+     * IdleStateEvent will be triggered when neither read nor write was performed for
+     * the specified period of this time. Specify {@code 0} to disable
+     */
+    private int serverChannelMaxAllIdleTimeSeconds = 0;
+
     private int serverSocketSndBufSize = 65535;
     private int serverSocketRcvBufSize = 65535;
     private boolean serverPooledByteBufAllocatorEnable = true;

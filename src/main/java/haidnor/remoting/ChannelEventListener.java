@@ -12,6 +12,12 @@ public interface ChannelEventListener {
     default void onChannelException(final String remoteAddr, final Channel channel) {
     }
 
-    default void onChannelIdle(final String remoteAddr, final Channel channel) {
+    default void onChannelReaderIdle(final String remoteAddr, final Channel channel) {
+    }
+
+    default void onChannelWriterIdle(final String remoteAddr, final Channel channel) {
+    }
+
+    default void onChannelAllIdle(final String remoteAddr, final Channel channel) {
     }
 }

@@ -546,25 +546,15 @@ public abstract class NettyRemotingAbstract {
 
             while (!this.isStopped()) {
                 try {
-                    // 3 秒钟扫描一次
                     NettyEvent event = this.eventQueue.poll(3000, TimeUnit.MILLISECONDS);
                     if (event != null && listener != null) {
                         switch (event.getType()) {
-                            case IDLE:
-                                listener.onChannelIdle(event.getRemoteAddr(), event.getChannel());
-                                break;
-                            case CLOSE:
-                                listener.onChannelClose(event.getRemoteAddr(), event.getChannel());
-                                break;
-                            case CONNECT:
-                                listener.onChannelConnect(event.getRemoteAddr(), event.getChannel());
-                                break;
-                            case EXCEPTION:
-                                listener.onChannelException(event.getRemoteAddr(), event.getChannel());
-                                break;
-                            default:
-                                break;
-
+                            case READER_IDLE -> listener.onChannelReaderIdle(event.getRemoteAddr(), event.getChannel());
+                            case WRITER_IDLE -> listener.onChannelWriterIdle(event.getRemoteAddr(), event.getChannel());
+                            case ALL_IDLE -> listener.onChannelAllIdle(event.getRemoteAddr(), event.getChannel());
+                            case CLOSE -> listener.onChannelClose(event.getRemoteAddr(), event.getChannel());
+                            case CONNECT -> listener.onChannelConnect(event.getRemoteAddr(), event.getChannel());
+                            case EXCEPTION -> listener.onChannelException(event.getRemoteAddr(), event.getChannel());
                         }
                     }
                 } catch (Exception e) {
