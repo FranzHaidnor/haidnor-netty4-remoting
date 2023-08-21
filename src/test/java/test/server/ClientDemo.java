@@ -11,7 +11,7 @@ public class ClientDemo {
 
     @SneakyThrows
     public static void main(String[] args) {
-        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
+        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig());
 
         ChannelEventListener eventListener = new ChannelEventListener() {
             @Override
@@ -38,11 +38,10 @@ public class ClientDemo {
 
 
         RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
-        RemotingCommand response = client.invokeSync(request);
+        RemotingCommand response = client.invokeSync("127.0.0.1:8080", request);
 
 
-
-        client.invokeOneway(request);
+        client.invokeOneway("127.0.0.1:8080", request);
     }
 
 }
