@@ -4,7 +4,6 @@ import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.InvokeCallback;
 import haidnor.remoting.RPCHook;
 import haidnor.remoting.RemotingClient;
-import haidnor.remoting.common.CommandRegistrar;
 import haidnor.remoting.common.Pair;
 import haidnor.remoting.exception.RemotingConnectException;
 import haidnor.remoting.exception.RemotingSendRequestException;
@@ -26,7 +25,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.SocketAddress;
 import java.security.cert.CertificateException;
 import java.util.Map;
@@ -42,8 +40,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class NettyRemotingClient extends NettyRemotingAbstract implements RemotingClient {
 
     private final String addr;
-
-    private final CommandRegistrar commandRegistrar = new CommandRegistrar();
 
     private static final long LOCK_TIMEOUT_MILLIS = 3000;
 
@@ -78,17 +74,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
 
     private DefaultEventExecutorGroup defaultEventExecutorGroup;
 
-    public <T extends Enum<T>> NettyRemotingClient(NettyClientConfig nettyClientConfig, String addr, Class<T> command) {
-        this(nettyClientConfig, addr);
-
-        // 注册接口
-        Field[] fields = command.getFields();
-        for (Field field : fields) {
-            commandRegistrar.register(field.getName());
-        }
-    }
-
-    private NettyRemotingClient(final NettyClientConfig nettyClientConfig, String addr) {
+    public NettyRemotingClient(final NettyClientConfig nettyClientConfig, String addr) {
         super(nettyClientConfig.getClientOnewaySemaphoreValue(), nettyClientConfig.getClientAsyncSemaphoreValue());
 
         this.nettyClientConfig = nettyClientConfig;
@@ -322,7 +308,6 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     @SneakyThrows
     @Override
     public RemotingCommand invokeSync(RemotingCommand request) {
-        commandRegistrar.checkCommandHash(request.getCommand());
         return invokeSync(request, nettyClientConfig.getTimeoutMillis());
     }
 

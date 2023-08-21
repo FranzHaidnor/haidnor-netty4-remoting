@@ -10,7 +10,7 @@ public class RemotingCommandDemo {
 
     @SneakyThrows
     public static void main(String[] args) {
-        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
+        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
 
         RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
 

@@ -11,7 +11,7 @@ public class ClientDemo {
 
     @SneakyThrows
     public static void main(String[] args) {
-        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
+        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
 
         ChannelEventListener eventListener = new ChannelEventListener() {
             @Override
