@@ -65,14 +65,14 @@ public class ClientDemo {
 
     public static void main(String[] args) {
         // 参数1:客户端配置类 参数2:服务端地址 参数3:指令枚举
-        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
+        RemotingClient client = new NettyRemotingClient(new NettyClientConfig());
 
         // 构建请求消息体
         RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
 
         try {
             // 同步发送请求
-            RemotingCommand response = client.invokeSync(request);
+            RemotingCommand response = client.invokeSync("127.0.0.1:8080", request);
 
         } catch (InterruptedException e) {
             // do something
@@ -149,19 +149,24 @@ public class ServerDemo {
             public void onChannelConnect(String remoteAddr, Channel channel) {
                 System.out.println("onChannelConnect");
             }
-
             @Override
             public void onChannelClose(String remoteAddr, Channel channel) {
                 System.out.println("onChannelClose");
             }
-
             @Override
             public void onChannelException(String remoteAddr, Channel channel) {
                 System.out.println("onChannelException");
             }
-
             @Override
-            public void onChannelIdle(String remoteAddr, Channel channel) {
+            public void onChannelReaderIdle(final String remoteAddr, final Channel channel) {
+                System.out.println("onChannelIdle");
+            }
+            @Override
+            public void onChannelWriterIdle(final String remoteAddr, final Channel channel) {
+                System.out.println("onChannelIdle");
+            }
+            @Override
+            public void onChannelAllIdle(final String remoteAddr, final Channel channel) {
                 System.out.println("onChannelIdle");
             }
         };
@@ -224,25 +229,25 @@ public class ClientDemo {
 
     @SneakyThrows
     public static void main(String[] args) {
-        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
+        RemotingClient client = new NettyRemotingClient(new NettyClientConfig());
 
         RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
 
         // 同步请求
-        RemotingCommand response1 = client.invokeSync(request);
-        RemotingCommand response2 = client.invokeSync(request, 1000); // 设置超时时间 1000 毫秒 (默认值 5000 毫秒)
+        RemotingCommand response1 = client.invokeSync("127.0.0.1:8080", request);
+        RemotingCommand response2 = client.invokeSync("127.0.0.1:8080", request, 1000); // 设置超时时间 1000 毫秒 (默认值 5000 毫秒)
 
         // 异步请求
-        client.invokeAsync(request, responseFuture -> {
+        client.invokeAsync("127.0.0.1:8080", request, responseFuture -> {
             RemotingCommand response = responseFuture.getResponseCommand();
         });
-        client.invokeAsync(request, 1000, responseFuture -> {  // 设置超时时间 1000 毫秒 (默认值 5000 毫秒)
+        client.invokeAsync("127.0.0.1:8080", request, 1000, responseFuture -> {  // 设置超时时间 1000 毫秒 (默认值 5000 毫秒)
             RemotingCommand response = responseFuture.getResponseCommand();
         });
 
         // 单向请求 （无返回结果）
-        client.invokeOneway(request);
-        client.invokeOneway(request,1000); // 设置超时时间 1000 毫秒 (默认值 5000 毫秒)
+        client.invokeOneway("127.0.0.1:8080", request);
+        client.invokeOneway("127.0.0.1:8080", request, 1000); // 设置超时时间 1000 毫秒 (默认值 5000 毫秒)
     }
 
 }
@@ -254,7 +259,7 @@ public class ClientDemo {
 
     @SneakyThrows
     public static void main(String[] args) {
-        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
+        RemotingClient client = new NettyRemotingClient(new NettyClientConfig());
 
         RPCHook hook1 = new RPCHook() {
             @Override
@@ -283,7 +288,7 @@ public class ClientDemo {
         client.registerRPCHook(hook2);
 
         RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
-        RemotingCommand response = client.invokeSync(request);
+        RemotingCommand response = client.invokeSync("127.0.0.1:8080", request);
     }
 
 }
@@ -296,26 +301,31 @@ public class ClientDemo {
 
     @SneakyThrows
     public static void main(String[] args) {
-        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
+        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig());
 
         ChannelEventListener eventListener = new ChannelEventListener() {
             @Override
             public void onChannelConnect(String remoteAddr, Channel channel) {
                 System.out.println("onChannelConnect");
             }
-
             @Override
             public void onChannelClose(String remoteAddr, Channel channel) {
                 System.out.println("onChannelClose");
             }
-
             @Override
             public void onChannelException(String remoteAddr, Channel channel) {
                 System.out.println("onChannelException");
             }
-
             @Override
-            public void onChannelIdle(String remoteAddr, Channel channel) {
+            public void onChannelReaderIdle(final String remoteAddr, final Channel channel) {
+                System.out.println("onChannelIdle");
+            }
+            @Override
+            public void onChannelWriterIdle(final String remoteAddr, final Channel channel) {
+                System.out.println("onChannelIdle");
+            }
+            @Override
+            public void onChannelAllIdle(final String remoteAddr, final Channel channel) {
                 System.out.println("onChannelIdle");
             }
         };
