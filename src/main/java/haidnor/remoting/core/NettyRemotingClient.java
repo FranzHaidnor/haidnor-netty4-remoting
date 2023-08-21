@@ -571,10 +571,8 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
                 if (event.state().equals(IdleState.ALL_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                     log.warn("NETTY CLIENT PIPELINE: IDLE exception [{}]", remoteAddress);
-                    closeChannel(ctx.channel());
                     if (NettyRemotingClient.this.channelEventListener != null) {
-                        NettyRemotingClient.this
-                                .putNettyEvent(new NettyEvent(NettyEventType.IDLE, remoteAddress, ctx.channel()));
+                        NettyRemotingClient.this.putNettyEvent(new NettyEvent(NettyEventType.IDLE, remoteAddress, ctx.channel()));
                     }
                 }
             }
