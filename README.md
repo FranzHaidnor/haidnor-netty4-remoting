@@ -65,7 +65,7 @@ public class ClientDemo {
 
     public static void main(String[] args) {
         // 参数1:客户端配置类 参数2:服务端地址 参数3:指令枚举
-        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
+        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
 
         // 构建请求消息体
         RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
@@ -224,7 +224,7 @@ public class ClientDemo {
 
     @SneakyThrows
     public static void main(String[] args) {
-        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
+        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
 
         RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
 
@@ -254,7 +254,7 @@ public class ClientDemo {
 
     @SneakyThrows
     public static void main(String[] args) {
-        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
+        RemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
 
         RPCHook hook1 = new RPCHook() {
             @Override
@@ -296,7 +296,7 @@ public class ClientDemo {
 
     @SneakyThrows
     public static void main(String[] args) {
-        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080", Command.class);
+        NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig(), "127.0.0.1:8080");
 
         ChannelEventListener eventListener = new ChannelEventListener() {
             @Override
