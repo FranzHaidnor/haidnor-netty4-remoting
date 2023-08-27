@@ -576,7 +576,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
                 IdleStateEvent event = (IdleStateEvent) evt;
                 if (event.state().equals(IdleState.ALL_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-                    log.warn("NETTY CLIENT PIPELINE: IDLE [{}]", remoteAddress);
+                    log.debug("NETTY CLIENT PIPELINE: IDLE [{}]", remoteAddress);
                     if (NettyRemotingClient.this.channelEventListener != null) {
                         NettyRemotingClient.this.putNettyEvent(new NettyEvent(NettyEventType.ALL_IDLE, remoteAddress, ctx.channel()));
                     }
@@ -588,8 +588,8 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-            log.warn("NETTY CLIENT PIPELINE: exceptionCaught {}", remoteAddress);
-            log.warn("NETTY CLIENT PIPELINE: exceptionCaught exception.", cause);
+            log.debug("NETTY CLIENT PIPELINE: exceptionCaught {}", remoteAddress);
+            log.debug("NETTY CLIENT PIPELINE: exceptionCaught exception.", cause);
             closeChannel(ctx.channel());
             if (NettyRemotingClient.this.channelEventListener != null) {
                 NettyRemotingClient.this.putNettyEvent(new NettyEvent(NettyEventType.EXCEPTION, remoteAddress, ctx.channel()));
