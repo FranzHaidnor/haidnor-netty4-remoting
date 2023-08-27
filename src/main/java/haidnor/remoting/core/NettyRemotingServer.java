@@ -415,19 +415,19 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
             if (evt instanceof IdleStateEvent event) {
                 if (event.state().equals(IdleState.READER_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-                    log.warn("NETTY SERVER PIPELINE: READER_IDLE [{}]", remoteAddress);
+                    log.debug("NETTY SERVER PIPELINE: READER_IDLE [{}]", remoteAddress);
                     if (NettyRemotingServer.this.channelEventListener != null) {
                         NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.READER_IDLE, remoteAddress, ctx.channel()));
                     }
                 } else if (event.state().equals(IdleState.WRITER_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-                    log.warn("NETTY SERVER PIPELINE: WRITER_IDLE [{}]", remoteAddress);
+                    log.debug("NETTY SERVER PIPELINE: WRITER_IDLE [{}]", remoteAddress);
                     if (NettyRemotingServer.this.channelEventListener != null) {
                         NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.WRITER_IDLE, remoteAddress, ctx.channel()));
                     }
                 } else if (event.state().equals(IdleState.ALL_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-                    log.warn("NETTY SERVER PIPELINE: IDLE [{}]", remoteAddress);
+                    log.debug("NETTY SERVER PIPELINE: IDLE [{}]", remoteAddress);
                     if (NettyRemotingServer.this.channelEventListener != null) {
                         NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.ALL_IDLE, remoteAddress, ctx.channel()));
                     }
@@ -439,8 +439,8 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-            log.warn("NETTY SERVER PIPELINE: exceptionCaught {}", remoteAddress);
-            log.warn("NETTY SERVER PIPELINE: exceptionCaught exception.", cause);
+            log.debug("NETTY SERVER PIPELINE: exceptionCaught {}", remoteAddress);
+            log.debug("NETTY SERVER PIPELINE: exceptionCaught exception.", cause);
             if (NettyRemotingServer.this.channelEventListener != null) {
                 NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.EXCEPTION, remoteAddress, ctx.channel()));
             }
