@@ -337,3 +337,6 @@ public class ClientDemo {
 
 }
 ```
+
+# 客户端与服务端异步交互流程
+![haidnor-rpc](./doc/images/img01.png)
