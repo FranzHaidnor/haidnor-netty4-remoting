@@ -4,7 +4,6 @@ import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.InvokeCallback;
 import haidnor.remoting.RPCHook;
 import haidnor.remoting.common.Pair;
-import haidnor.remoting.util.RemotingHelper;
 import haidnor.remoting.common.SemaphoreReleaseOnlyOnce;
 import haidnor.remoting.common.ServiceThread;
 import haidnor.remoting.exception.RemotingSendRequestException;
@@ -12,6 +11,7 @@ import haidnor.remoting.exception.RemotingTimeoutException;
 import haidnor.remoting.exception.RemotingTooMuchRequestException;
 import haidnor.remoting.protocol.RemotingCommand;
 import haidnor.remoting.protocol.RemotingSysResponseCode;
+import haidnor.remoting.util.RemotingHelper;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -118,8 +118,12 @@ public abstract class NettyRemotingAbstract {
     public void processMessageReceived(ChannelHandlerContext ctx, RemotingCommand msg) {
         if (msg != null) {
             switch (msg.getType()) {
-                case REQUEST_COMMAND -> processRequestCommand(ctx, msg);
-                case RESPONSE_COMMAND -> processResponseCommand(ctx, msg);
+                case REQUEST_COMMAND:
+                    processRequestCommand(ctx, msg);
+                    break;
+                case RESPONSE_COMMAND:
+                    processResponseCommand(ctx, msg);
+                    break;
             }
         }
     }
@@ -549,12 +553,24 @@ public abstract class NettyRemotingAbstract {
                     NettyEvent event = this.eventQueue.poll(3000, TimeUnit.MILLISECONDS);
                     if (event != null && listener != null) {
                         switch (event.getType()) {
-                            case READER_IDLE -> listener.onChannelReaderIdle(event.getRemoteAddr(), event.getChannel());
-                            case WRITER_IDLE -> listener.onChannelWriterIdle(event.getRemoteAddr(), event.getChannel());
-                            case ALL_IDLE -> listener.onChannelAllIdle(event.getRemoteAddr(), event.getChannel());
-                            case CLOSE -> listener.onChannelClose(event.getRemoteAddr(), event.getChannel());
-                            case CONNECT -> listener.onChannelConnect(event.getRemoteAddr(), event.getChannel());
-                            case EXCEPTION -> listener.onChannelException(event.getRemoteAddr(), event.getChannel());
+                            case READER_IDLE:
+                                listener.onChannelReaderIdle(event.getRemoteAddr(), event.getChannel());
+                                break;
+                            case WRITER_IDLE:
+                                listener.onChannelWriterIdle(event.getRemoteAddr(), event.getChannel());
+                                break;
+                            case ALL_IDLE:
+                                listener.onChannelAllIdle(event.getRemoteAddr(), event.getChannel());
+                                break;
+                            case CLOSE:
+                                listener.onChannelClose(event.getRemoteAddr(), event.getChannel());
+                                break;
+                            case CONNECT:
+                                listener.onChannelConnect(event.getRemoteAddr(), event.getChannel());
+                                break;
+                            case EXCEPTION:
+                                listener.onChannelException(event.getRemoteAddr(), event.getChannel());
+                                break;
                         }
                     }
                 } catch (Exception e) {

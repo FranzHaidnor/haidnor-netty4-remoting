@@ -329,11 +329,12 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
             byte b = msg.getByte(0);
             if (b == HANDSHAKE_MAGIC_CODE) {  // 0x16
                 switch (tlsMode) {
-                    case DISABLED -> {
+                    case DISABLED:
                         ctx.close();
                         log.warn("Clients intend to establish an SSL connection while this server is running in SSL disabled mode");
-                    }
-                    case PERMISSIVE, ENFORCING -> {
+                        break;
+                    case PERMISSIVE:
+                    case ENFORCING:
                         if (null != sslContext) {
                             ctx.pipeline()
                                     .addAfter(defaultEventExecutorGroup, HANDSHAKE_HANDLER_NAME, TLS_HANDLER_NAME, sslContext.newHandler(ctx.channel().alloc()))
@@ -343,8 +344,9 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                             ctx.close();
                             log.error("Trying to establish an SSL connection but sslContext is null");
                         }
-                    }
-                    default -> log.warn("Unknown TLS mode");
+                        break;
+                    default:
+                        log.warn("Unknown TLS mode");
                 }
             } else if (tlsMode == TlsMode.ENFORCING) {
                 ctx.close();
@@ -412,7 +414,8 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
 
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-            if (evt instanceof IdleStateEvent event) {
+            if (evt instanceof IdleStateEvent) {
+                IdleStateEvent event = (IdleStateEvent) evt;
                 if (event.state().equals(IdleState.READER_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                     log.warn("NETTY SERVER PIPELINE: READER_IDLE [{}]", remoteAddress);

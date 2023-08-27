@@ -371,7 +371,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
 
                     if (cw.isOK()) {
                         return cw.getChannel();
-                    } else if (!cw.channelFuture().isDone()) {
+                    } else if (!cw.getChannelFuture().isDone()) {
                         createNewConnection = false;
                     } else {
                         this.channelTables.remove(addr);
@@ -397,7 +397,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
 
         if (cw != null) {
-            ChannelFuture channelFuture = cw.channelFuture();
+            ChannelFuture channelFuture = cw.getChannelFuture();
             if (channelFuture.awaitUninterruptibly(this.nettyClientConfig.getConnectTimeoutMillis())) {
                 if (cw.isOK()) {
                     log.debug("createChannel: connect remote host[{}] success, {}", addr, channelFuture.toString());
@@ -500,8 +500,12 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         this.callbackExecutor = callbackExecutor;
     }
 
-    // static class ChannelWrapper
-    record ChannelWrapper(ChannelFuture channelFuture) {
+    static class ChannelWrapper {
+        private final ChannelFuture channelFuture;
+
+        public ChannelWrapper(ChannelFuture channelFuture) {
+            this.channelFuture = channelFuture;
+        }
 
         public boolean isOK() {
             return this.channelFuture.channel() != null && this.channelFuture.channel().isActive();
@@ -513,6 +517,10 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
 
         private Channel getChannel() {
             return this.channelFuture.channel();
+        }
+
+        public ChannelFuture getChannelFuture() {
+            return channelFuture;
         }
     }
 
@@ -564,7 +572,8 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
 
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-            if (evt instanceof IdleStateEvent event) {
+            if (evt instanceof IdleStateEvent) {
+                IdleStateEvent event = (IdleStateEvent) evt;
                 if (event.state().equals(IdleState.ALL_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                     log.warn("NETTY CLIENT PIPELINE: IDLE [{}]", remoteAddress);
