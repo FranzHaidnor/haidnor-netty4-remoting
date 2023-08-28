@@ -19,8 +19,11 @@ public interface RemotingClient extends RemotingService {
     void invokeOneway(final String addr, final RemotingCommand request);
 
     void invokeOneway(final String addr, final RemotingCommand request, final long timeoutMillis);
-
-    void registerProcessor(final int requestCode, final NettyRequestProcessor processor, final ExecutorService executor);
+    /**
+     * 注册请求处理器
+     * 将处理器放入 HashMap<Integer, Pair<NettyRequestProcessor, ExecutorService>> processorTable 中
+     */
+    <T extends Enum<T>> void  registerProcessor(T commandEnum, final NettyRequestProcessor processor, final ExecutorService executor);
 
     ExecutorService getCallbackExecutor();
 
