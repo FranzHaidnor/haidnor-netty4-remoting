@@ -2,9 +2,6 @@ package haidnor.remoting;
 
 import haidnor.remoting.common.Pair;
 import haidnor.remoting.core.NettyRequestProcessor;
-import haidnor.remoting.exception.RemotingSendRequestException;
-import haidnor.remoting.exception.RemotingTimeoutException;
-import haidnor.remoting.exception.RemotingTooMuchRequestException;
 import haidnor.remoting.protocol.RemotingCommand;
 import io.netty.channel.Channel;
 
@@ -24,13 +21,17 @@ public interface RemotingServer extends RemotingService {
 
     Pair<NettyRequestProcessor, ExecutorService> getProcessorPair(final int requestCode);
 
-    RemotingCommand invokeSync(final Channel channel, final RemotingCommand request, final long timeoutMillis)
-            throws InterruptedException, RemotingSendRequestException, RemotingTimeoutException;
+    RemotingCommand invokeSync(final Channel channel, final RemotingCommand request, final long timeoutMillis);
 
-    void invokeAsync(final Channel channel, final RemotingCommand request, final long timeoutMillis, final InvokeCallback invokeCallback)
-            throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
+    RemotingCommand invokeSync(final Channel channel, final RemotingCommand request);
 
-    void invokeOneway(final Channel channel, final RemotingCommand request, final long timeoutMillis)
-            throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
+    void invokeAsync(final Channel channel, final RemotingCommand request, final long timeoutMillis, final InvokeCallback invokeCallback);
+
+    void invokeAsync(final Channel channel, final RemotingCommand request, final InvokeCallback invokeCallback);
+
+    void invokeOneway(final Channel channel, final RemotingCommand request, final long timeoutMillis);
+
+    void invokeOneway(final Channel channel, final RemotingCommand request);
+
 
 }

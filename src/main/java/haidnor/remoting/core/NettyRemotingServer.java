@@ -7,9 +7,6 @@ import haidnor.remoting.RemotingServer;
 import haidnor.remoting.common.CommandRegistrar;
 import haidnor.remoting.common.Pair;
 import haidnor.remoting.common.TlsMode;
-import haidnor.remoting.exception.RemotingSendRequestException;
-import haidnor.remoting.exception.RemotingTimeoutException;
-import haidnor.remoting.exception.RemotingTooMuchRequestException;
 import haidnor.remoting.protocol.RemotingCommand;
 import haidnor.remoting.util.RemotingHelper;
 import haidnor.remoting.util.RemotingUtil;
@@ -27,6 +24,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -282,22 +280,40 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         return processorTable.get(requestCode);
     }
 
+    @SneakyThrows
     @Override
-    public RemotingCommand invokeSync(final Channel channel, final RemotingCommand request, final long timeoutMillis)
-            throws InterruptedException, RemotingSendRequestException, RemotingTimeoutException {
+    public RemotingCommand invokeSync(final Channel channel, final RemotingCommand request, final long timeoutMillis) {
         return this.invokeSyncImpl(channel, request, timeoutMillis);
     }
 
+    @SneakyThrows
     @Override
-    public void invokeAsync(Channel channel, RemotingCommand request, long timeoutMillis, InvokeCallback invokeCallback)
-            throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+    public RemotingCommand invokeSync(Channel channel, RemotingCommand request) {
+        return this.invokeSyncImpl(channel, request, serverConfig.getTimeoutMillis());
+    }
+
+    @SneakyThrows
+    @Override
+    public void invokeAsync(Channel channel, RemotingCommand request, long timeoutMillis, InvokeCallback invokeCallback) {
         this.invokeAsyncImpl(channel, request, timeoutMillis, invokeCallback);
     }
 
+    @SneakyThrows
     @Override
-    public void invokeOneway(Channel channel, RemotingCommand request, long timeoutMillis) throws InterruptedException,
-            RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+    public void invokeAsync(Channel channel, RemotingCommand request, InvokeCallback invokeCallback) {
+        this.invokeAsyncImpl(channel, request, serverConfig.getTimeoutMillis(), invokeCallback);
+    }
+
+    @SneakyThrows
+    @Override
+    public void invokeOneway(Channel channel, RemotingCommand request, long timeoutMillis)  {
         this.invokeOnewayImpl(channel, request, timeoutMillis);
+    }
+
+    @SneakyThrows
+    @Override
+    public void invokeOneway(Channel channel, RemotingCommand request) {
+        this.invokeOnewayImpl(channel, request, serverConfig.getTimeoutMillis());
     }
 
     @Override
