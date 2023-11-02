@@ -31,9 +31,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.security.cert.CertificateException;
-import java.util.NoSuchElementException;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -61,6 +59,9 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     private final NettyEncoder nettyEncoder = new NettyEncoder();
     private final NettyConnectManageHandler connectionManageHandler = new NettyConnectManageHandler();
     private final NettyServerHandler serverHandler = new NettyServerHandler();
+
+    private final List<ChannelHandler> customerFirstChannelHandlerList = new ArrayList<>();
+    private final List<ChannelHandler> customerLastChannelHandlerList = new ArrayList<>();
 
     public <T extends Enum<T>> NettyRemotingServer(final NettyServerConfig serverConfig, Class<T> command) {
         super(serverConfig.getServerOnewaySemaphoreValue(), serverConfig.getServerAsyncSemaphoreValue());
@@ -174,6 +175,10 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) {
+                        for (ChannelHandler channelHandler : customerFirstChannelHandlerList) {
+                            ch.pipeline().addFirst(defaultEventExecutorGroup, channelHandler);
+                        }
+
                         ch.pipeline()
                                 // InboundHandler
                                 .addLast(defaultEventExecutorGroup, HANDSHAKE_HANDLER_NAME, handshakeHandler)
@@ -186,6 +191,10 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                                 .addLast(defaultEventExecutorGroup, new NettyDecoder())
                                 // InboundHandler
                                 .addLast(defaultEventExecutorGroup, serverHandler);
+
+                        for (ChannelHandler channelHandler : customerLastChannelHandlerList) {
+                            ch.pipeline().addLast(defaultEventExecutorGroup, channelHandler);
+                        }
                     }
                 });
 
@@ -306,7 +315,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
 
     @SneakyThrows
     @Override
-    public void invokeOneway(Channel channel, RemotingCommand request, long timeoutMillis)  {
+    public void invokeOneway(Channel channel, RemotingCommand request, long timeoutMillis) {
         this.invokeOnewayImpl(channel, request, timeoutMillis);
     }
 
@@ -314,6 +323,16 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     @Override
     public void invokeOneway(Channel channel, RemotingCommand request) {
         this.invokeOnewayImpl(channel, request, serverConfig.getTimeoutMillis());
+    }
+
+    @Override
+    public void addFirstChannelHandler(ChannelHandler channelHandler) {
+        this.customerFirstChannelHandlerList.add(channelHandler);
+    }
+
+    @Override
+    public void addLastChannelHandler(ChannelHandler channelHandler) {
+        this.customerLastChannelHandlerList.add(channelHandler);
     }
 
     @Override

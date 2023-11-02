@@ -27,9 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.security.cert.CertificateException;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -71,6 +69,9 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     private ExecutorService callbackExecutor;
 
     private DefaultEventExecutorGroup defaultEventExecutorGroup;
+
+    private final List<ChannelHandler> customerFirstChannelHandlerList = new ArrayList<>();
+    private final List<ChannelHandler> customerLastChannelHandlerList = new ArrayList<>();
 
     public NettyRemotingClient(final NettyClientConfig nettyClientConfig) {
         super(nettyClientConfig.getClientOnewaySemaphoreValue(), nettyClientConfig.getClientAsyncSemaphoreValue());
@@ -138,6 +139,10 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
                         @Override
                         public void initChannel(SocketChannel ch) {
                             ChannelPipeline pipeline = ch.pipeline();
+                            for (ChannelHandler channelHandler : customerFirstChannelHandlerList) {
+                                pipeline.addLast(defaultEventExecutorGroup, channelHandler);
+                            }
+
                             if (nettyClientConfig.isUseTLS()) {
                                 if (null != sslContext) {
                                     pipeline.addFirst(defaultEventExecutorGroup, "sslHandler", sslContext.newHandler(ch.alloc()));
@@ -153,6 +158,10 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
                                     new IdleStateHandler(nettyClientConfig.getClientChannelMaxReaderIdleTimeSeconds(), nettyClientConfig.getClientChannelMaxWriterIdleTimeSeconds(), nettyClientConfig.getClientChannelMaxAllIdleTimeSeconds()),
                                     new NettyConnectManageHandler(),
                                     new NettyClientHandler());
+
+                            for (ChannelHandler channelHandler : customerLastChannelHandlerList) {
+                                pipeline.addLast(defaultEventExecutorGroup, channelHandler);
+                            }
                         }
                     });
 
@@ -466,7 +475,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     }
 
     @Override
-    public <T extends Enum<T>> void  registerProcessor(T command, NettyRequestProcessor processor, ExecutorService executor) {
+    public <T extends Enum<T>> void registerProcessor(T command, NettyRequestProcessor processor, ExecutorService executor) {
         ExecutorService executorThis = executor;
         if (null == executor) {
             executorThis = this.publicExecutor;
@@ -483,6 +492,16 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
             return cw.isWritable();
         }
         return true;
+    }
+
+    @Override
+    public void addFirstChannelHandler(ChannelHandler channelHandler) {
+        this.customerFirstChannelHandlerList.add(channelHandler);
+    }
+
+    @Override
+    public void addLastChannelHandler(ChannelHandler channelHandler) {
+        this.customerLastChannelHandlerList.add(channelHandler);
     }
 
     @Override

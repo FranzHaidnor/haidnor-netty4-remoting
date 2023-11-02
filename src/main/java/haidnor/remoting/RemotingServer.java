@@ -4,6 +4,7 @@ import haidnor.remoting.common.Pair;
 import haidnor.remoting.core.NettyRequestProcessor;
 import haidnor.remoting.protocol.RemotingCommand;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 
 import java.util.concurrent.ExecutorService;
 
@@ -33,5 +34,7 @@ public interface RemotingServer extends RemotingService {
 
     void invokeOneway(final Channel channel, final RemotingCommand request);
 
+    void addFirstChannelHandler(ChannelHandler channelHandler);
+    void addLastChannelHandler(ChannelHandler channelHandler);
 
 }

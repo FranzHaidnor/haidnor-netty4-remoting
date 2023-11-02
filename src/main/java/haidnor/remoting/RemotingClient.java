@@ -3,6 +3,7 @@ package haidnor.remoting;
 
 import haidnor.remoting.core.NettyRequestProcessor;
 import haidnor.remoting.protocol.RemotingCommand;
+import io.netty.channel.ChannelHandler;
 
 import java.util.concurrent.ExecutorService;
 
@@ -30,4 +31,8 @@ public interface RemotingClient extends RemotingService {
     void setCallbackExecutor(final ExecutorService callbackExecutor);
 
     boolean isChannelWritable(final String addr);
+
+    void addFirstChannelHandler(ChannelHandler channelHandler);
+    void addLastChannelHandler(ChannelHandler channelHandler);
+
 }
