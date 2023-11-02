@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -411,79 +412,119 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
 
     @ChannelHandler.Sharable
     class NettyConnectManageHandler extends ChannelDuplexHandler {
-        @Override
-        public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-            final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-            log.debug("NETTY SERVER PIPELINE: channelRegistered {}", remoteAddress);
-            super.channelRegistered(ctx);
-        }
 
-        @Override
-        public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-            final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-            log.debug("NETTY SERVER PIPELINE: channelUnregistered, the channel[{}]", remoteAddress);
-            super.channelUnregistered(ctx);
-        }
-
+        /**
+         * ChannelHandlerContext的Channel现在处于活动状态
+         */
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
             final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-            log.debug("NETTY SERVER PIPELINE: channelActive, the channel[{}]", remoteAddress);
+            log.debug("NETTY SERVER PIPELINE: channelActive {}", remoteAddress);
             super.channelActive(ctx);
-
             if (NettyRemotingServer.this.channelEventListener != null) {
-                NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.CONNECT, remoteAddress, ctx.channel()));
+                NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.IN_BOUND_ACTIVE, remoteAddress, ctx.channel()));
             }
         }
 
+        /**
+         * 已注册的 {@link ChannelHandlerContext} 的 {@link Channel} 现在处于非活动状态并已达到其生命周期终点。
+         */
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
             final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-            log.debug("NETTY SERVER PIPELINE: channelInactive, the channel[{}]", remoteAddress);
-            super.channelInactive(ctx);
-
+            log.debug("NETTY SERVER PIPELINE: channelInactive {}", remoteAddress);
+            super.channelActive(ctx);
             if (NettyRemotingServer.this.channelEventListener != null) {
-                NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.CLOSE, remoteAddress, ctx.channel()));
+                NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.IN_BOUND_INACTIVE, remoteAddress, ctx.channel()));
             }
         }
 
+        /**
+         * 如果触发用户事件则调用
+         */
         @Override
-        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
             if (evt instanceof IdleStateEvent) {
                 IdleStateEvent event = (IdleStateEvent) evt;
                 if (event.state().equals(IdleState.READER_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                     log.warn("NETTY SERVER PIPELINE: READER_IDLE [{}]", remoteAddress);
                     if (NettyRemotingServer.this.channelEventListener != null) {
-                        NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.READER_IDLE, remoteAddress, ctx.channel()));
+                        NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.IN_BOUND_READER_IDLE, remoteAddress, ctx.channel()));
                     }
                 } else if (event.state().equals(IdleState.WRITER_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                     log.debug("NETTY SERVER PIPELINE: WRITER_IDLE [{}]", remoteAddress);
                     if (NettyRemotingServer.this.channelEventListener != null) {
-                        NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.WRITER_IDLE, remoteAddress, ctx.channel()));
+                        NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.IN_BOUND_WRITER_IDLE, remoteAddress, ctx.channel()));
                     }
                 } else if (event.state().equals(IdleState.ALL_IDLE)) {
                     final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                     log.debug("NETTY SERVER PIPELINE: IDLE [{}]", remoteAddress);
                     if (NettyRemotingServer.this.channelEventListener != null) {
-                        NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.ALL_IDLE, remoteAddress, ctx.channel()));
+                        NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.IN_BOUND_ALL_IDLE, remoteAddress, ctx.channel()));
                     }
                 }
             }
             ctx.fireUserEventTriggered(evt);
         }
 
+        /**
+         * 如果抛出 {@link Throwable} 则调用
+         */
         @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
             log.debug("NETTY SERVER PIPELINE: exceptionCaught {}", remoteAddress);
             log.debug("NETTY SERVER PIPELINE: exceptionCaught exception.", cause);
             if (NettyRemotingServer.this.channelEventListener != null) {
-                NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.EXCEPTION, remoteAddress, ctx.channel()));
+                NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.IN_BOUND_EXCEPTION_CAUGHT, remoteAddress, ctx.channel()));
             }
-            RemotingUtil.closeChannel(ctx.channel());
         }
+
+        // Override ChannelOutboundHandler ------------------------------------------------------------------------------
+
+        /**
+         * 进行连接操作后调用
+         */
+        @Override
+        public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) throws Exception {
+            final String local = localAddress == null ? "UNKNOWN" : RemotingHelper.parseSocketAddressAddr(localAddress);
+            final String remote = remoteAddress == null ? "UNKNOWN" : RemotingHelper.parseSocketAddressAddr(remoteAddress);
+            log.debug("NETTY SERVER PIPELINE: CONNECT  {} => {}", local, remote);
+            super.connect(ctx, remoteAddress, localAddress, promise);
+            if (NettyRemotingServer.this.channelEventListener != null) {
+                NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.OUT_BOUND_CONNECT, remote, ctx.channel()));
+            }
+        }
+
+        /**
+         * 进行断开连接操作后调用
+         */
+        @Override
+        public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+            final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
+            log.debug("NETTY SERVER PIPELINE: DISCONNECT {}", remoteAddress);
+            super.disconnect(ctx, promise);
+            if (NettyRemotingServer.this.channelEventListener != null) {
+                NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.OUT_BOUND_DISCONNECT, remoteAddress, ctx.channel()));
+            }
+        }
+
+        /**
+         * 进行关闭操作后调用
+         */
+        @Override
+        public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+            final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
+            log.debug("NETTY SERVER PIPELINE: CLOSE {}", remoteAddress);
+            super.close(ctx, promise);
+            NettyRemotingServer.this.failFast(ctx.channel());
+            if (NettyRemotingServer.this.channelEventListener != null) {
+                NettyRemotingServer.this.putNettyEvent(new NettyEvent(NettyEventType.OUT_BOUND_CLOSE, remoteAddress, ctx.channel()));
+            }
+        }
+
     }
 
 }

@@ -553,23 +553,32 @@ public abstract class NettyRemotingAbstract {
                     NettyEvent event = this.eventQueue.poll(3000, TimeUnit.MILLISECONDS);
                     if (event != null && listener != null) {
                         switch (event.getType()) {
-                            case READER_IDLE:
-                                listener.onChannelReaderIdle(event.getRemoteAddr(), event.getChannel());
+                            case OUT_BOUND_CONNECT:
+                                listener.onOutBoundConnect(event.getRemoteAddr(), event.getChannel());
                                 break;
-                            case WRITER_IDLE:
-                                listener.onChannelWriterIdle(event.getRemoteAddr(), event.getChannel());
+                            case OUT_BOUND_DISCONNECT:
+                                listener.onOutBoundDisconnect(event.getRemoteAddr(), event.getChannel());
                                 break;
-                            case ALL_IDLE:
-                                listener.onChannelAllIdle(event.getRemoteAddr(), event.getChannel());
+                            case OUT_BOUND_CLOSE:
+                                listener.onOutBoundClose(event.getRemoteAddr(), event.getChannel());
                                 break;
-                            case CLOSE:
-                                listener.onChannelClose(event.getRemoteAddr(), event.getChannel());
+                            case IN_BOUND_ACTIVE:
+                                listener.onInBoundActive(event.getRemoteAddr(), event.getChannel());
                                 break;
-                            case CONNECT:
-                                listener.onChannelConnect(event.getRemoteAddr(), event.getChannel());
+                            case IN_BOUND_INACTIVE:
+                                listener.onInBoundInactive(event.getRemoteAddr(), event.getChannel());
                                 break;
-                            case EXCEPTION:
-                                listener.onChannelException(event.getRemoteAddr(), event.getChannel());
+                            case IN_BOUND_EXCEPTION_CAUGHT:
+                                listener.onInBoundExceptionCaught(event.getRemoteAddr(), event.getChannel());
+                                break;
+                            case IN_BOUND_READER_IDLE:
+                                listener.onInBoundReaderIdle(event.getRemoteAddr(), event.getChannel());
+                                break;
+                            case IN_BOUND_WRITER_IDLE:
+                                listener.onInBoundWriterIdle(event.getRemoteAddr(), event.getChannel());
+                                break;
+                            case IN_BOUND_ALL_IDLE:
+                                listener.onInBoundAllIdle(event.getRemoteAddr(), event.getChannel());
                                 break;
                         }
                     }

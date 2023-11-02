@@ -1,8 +1,10 @@
 package test.server;
 
+import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.core.NettyClientConfig;
 import haidnor.remoting.core.NettyRemotingClient;
 import haidnor.remoting.protocol.RemotingCommand;
+import io.netty.channel.Channel;
 import lombok.SneakyThrows;
 
 public class ClientDemo {
@@ -11,19 +13,35 @@ public class ClientDemo {
     public static void main(String[] args) {
         NettyRemotingClient client = new NettyRemotingClient(new NettyClientConfig());
 
-        RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
+        client.registerChannelEventListener(new ChannelEventListener() {
+            @Override
+            public void onOutBoundConnect(String remoteAddr, Channel channel) {
+                System.out.println("发起连接");
+            }
 
-        // 同步发送
-        RemotingCommand response = client.invokeSync("127.0.0.1:8080", request);
-
-        // 异步发送
-        client.invokeAsync("127.0.0.1:8080", request, responseFuture -> {
-            byte[] body = response.getBody();
-            System.out.println(new String(response.getBody()));
+            @Override
+            public void onOutBoundClose(String remoteAddr, Channel channel) {
+                System.out.println("连接已关闭");
+            }
         });
 
-        // 发送后不管
-        client.invokeOneway("127.0.0.1:8080", request);
+        // 同步发送
+        RemotingCommand request = RemotingCommand.creatRequest(Command.GET_SERVER_INFO);
+        try {
+            RemotingCommand response = client.invokeSync("127.0.0.1:8080", request);
+        } catch (Exception e) {
+
+        }
+
+
+//        try {
+//            client.invokeAsync("127.0.0.1:8080", request, responseFuture -> {
+//            });
+//        } catch (Exception e) {
+//
+//        }
+//        client.invokeOneway("127.0.0.1:8080", request);
+//    }
     }
 
 }
