@@ -31,6 +31,7 @@ public class NettyServerConfig {
 
     private int serverSocketSndBufSize = 65535;
     private int serverSocketRcvBufSize = 65535;
+    private int frameMaxLength = 16777216;
     private boolean serverPooledByteBufAllocatorEnable = true;
     /**
      * make make install

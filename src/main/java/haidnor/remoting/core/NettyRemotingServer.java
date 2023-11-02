@@ -189,7 +189,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                                 // OutboundHandler 编码器
                                 .addLast(defaultEventExecutorGroup, nettyEncoder)
                                 // InboundHandler 解码器 ByteBuf > RemotingCommand
-                                .addLast(defaultEventExecutorGroup, new NettyDecoder())
+                                .addLast(defaultEventExecutorGroup, new NettyDecoder(serverConfig.getFrameMaxLength()))
                                 // InboundHandler
                                 .addLast(defaultEventExecutorGroup, serverHandler);
 

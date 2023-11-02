@@ -36,6 +36,7 @@ public class NettyClientConfig {
 
     private int clientSocketSndBufSize = 65535;
     private int clientSocketRcvBufSize = 65535;
+    private int frameMaxLength = 65535;
     private boolean clientPooledByteBufAllocatorEnable = false;
     private boolean clientCloseSocketIfTimeout = true;
     private boolean useTLS;
