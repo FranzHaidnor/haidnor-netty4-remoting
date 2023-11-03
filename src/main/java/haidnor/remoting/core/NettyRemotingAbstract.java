@@ -152,7 +152,7 @@ public abstract class NettyRemotingAbstract {
      * @param cmd request command.
      */
     public void processRequestCommand(final ChannelHandlerContext ctx, final RemotingCommand cmd) {
-        final Pair<NettyRequestProcessor, ExecutorService> matched = this.processorTable.get(cmd.getCode());
+        final Pair<NettyRequestProcessor, ExecutorService> matched = this.processorTable.get(cmd.getCommandHashCode());
         final Pair<NettyRequestProcessor, ExecutorService> pair = null == matched ? this.defaultRequestProcessor : matched;
         final int opaque = cmd.getOpaque();
 
@@ -171,7 +171,7 @@ public abstract class NettyRemotingAbstract {
                             public void callback(RemotingCommand response) {
                                 // 回调时循环执行 List<RPCHook> rpcHooks 钩子方法  doAfterResponse()
                                 doAfterRpcHooks(RemotingHelper.parseChannelRemoteAddr(ctx.channel()), cmd, response);
-                                if (!cmd.isOnewayRPC()) {
+                                if (cmd.isOnewayRPC()) {
                                     if (response != null) {
                                         response.setOpaque(opaque);
                                         response.markResponseType();
@@ -202,7 +202,7 @@ public abstract class NettyRemotingAbstract {
                         log.error("process request exception", e);
                         log.error(cmd.toString());
 
-                        if (!cmd.isOnewayRPC()) {
+                        if (cmd.isOnewayRPC()) {
                             final RemotingCommand response = RemotingCommand.createResponse(RemotingSysResponseCode.SYSTEM_ERROR, RemotingHelper.exceptionSimpleDesc(e));
                             response.setOpaque(opaque);
                             ctx.writeAndFlush(response);
@@ -227,10 +227,10 @@ public abstract class NettyRemotingAbstract {
                     log.warn(RemotingHelper.parseChannelRemoteAddr(ctx.channel())
                             + ", too many requests and system thread pool busy, RejectedExecutionException "
                             + pair.getObject2().toString()
-                            + " request code: " + cmd.getCode());
+                            + " request code: " + cmd.getCommandHashCode());
                 }
 
-                if (!cmd.isOnewayRPC()) {
+                if (cmd.isOnewayRPC()) {
                     final RemotingCommand response = RemotingCommand.createResponse(RemotingSysResponseCode.SYSTEM_BUSY,
                             "[OVERLOAD]system busy, start flow control for a while");
                     response.setOpaque(opaque);
@@ -238,7 +238,7 @@ public abstract class NettyRemotingAbstract {
                 }
             }
         } else {
-            String error = " request type " + cmd.getCode() + " not supported";
+            String error = " request type " + cmd.getCommandHashCode() + " not supported";
             final RemotingCommand response = RemotingCommand.createResponse(RemotingSysResponseCode.REQUEST_CODE_NOT_SUPPORTED, error);
             response.setOpaque(opaque);
             ctx.writeAndFlush(response);
