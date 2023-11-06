@@ -97,7 +97,11 @@ public class RemotingCommand {
     }
 
     public ByteBuffer encode() {
-        int remarkLength = remark != null ? remark.length() : 0;
+        byte[] remarkBytes = null;
+        if (remark != null) {
+            remarkBytes = remark.getBytes(StandardCharsets.UTF_8);
+        }
+        int remarkLength = remarkBytes != null ? remarkBytes.length : 0;
         int bodyLength = body != null ? body.length : 0;
         int length = 28 + remarkLength + bodyLength;
 
@@ -126,7 +130,7 @@ public class RemotingCommand {
 
         // 若干字节 > 备注文本内容
         if (remarkLength != 0) {
-            buffer.put(remark.getBytes(StandardCharsets.UTF_8));
+            buffer.put(remarkBytes);
         }
 
         // 4 > 消息体长度

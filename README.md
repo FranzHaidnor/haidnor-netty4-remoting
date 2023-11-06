@@ -3,7 +3,7 @@
 
 # 1 版本要求与配置
 ## JDK 版本要求
-要求 JDK 17 及以上 
+要求 JDK 8 及以上 
 
 ## maven pom.xml 配置
 ```xml
