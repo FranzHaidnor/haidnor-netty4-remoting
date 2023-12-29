@@ -40,29 +40,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class NettyRemotingServer extends NettyRemotingAbstract implements RemotingServer {
-    private final CommandRegistrar commandRegistrar = new CommandRegistrar();
-
-    private final NettyServerConfig serverConfig;
     private static final String HANDSHAKE_HANDLER_NAME = "handshakeHandler";
     private static final String TLS_HANDLER_NAME = "sslHandler";
     private static final String FILE_REGION_ENCODER_NAME = "fileRegionEncoder";
+    private final CommandRegistrar commandRegistrar = new CommandRegistrar();
+    private final NettyServerConfig serverConfig;
     private final ServerBootstrap serverBootstrap;
     private final EventLoopGroup eventLoopGroupSelector;
     private final EventLoopGroup eventLoopGroupBoss;
     private final ExecutorService publicExecutor;
-    private ChannelEventListener channelEventListener;
     private final Timer timer = new Timer("ServerHouseKeepingService", true);
-    private DefaultEventExecutorGroup defaultEventExecutorGroup;
-    private int port = 0;
-
     // ChannelHandler --------------------------------------------------------------------------------------------------
     private final HandshakeHandler handshakeHandler = new HandshakeHandler(TlsSystemConfig.tlsMode);
     private final NettyEncoder nettyEncoder = new NettyEncoder();
     private final NettyConnectManageHandler connectionManageHandler = new NettyConnectManageHandler();
     private final NettyServerHandler serverHandler = new NettyServerHandler();
-
     private final List<ChannelHandler> customerFirstChannelHandlerList = new ArrayList<>();
     private final List<ChannelHandler> customerLastChannelHandlerList = new ArrayList<>();
+    private ChannelEventListener channelEventListener;
+    private DefaultEventExecutorGroup defaultEventExecutorGroup;
+    private int port = 0;
 
     public <T extends Enum<T>> NettyRemotingServer(final NettyServerConfig serverConfig, Class<T> command) {
         super(serverConfig.getServerOnewaySemaphoreValue(), serverConfig.getServerAsyncSemaphoreValue());

@@ -60,18 +60,14 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     private final Timer timer = new Timer("ClientHouseKeepingService", true);
 
     private final ExecutorService publicExecutor;
-
+    private final List<ChannelHandler> customerFirstChannelHandlerList = new ArrayList<>();
+    private final List<ChannelHandler> customerLastChannelHandlerList = new ArrayList<>();
     private ChannelEventListener channelEventListener;
-
     /**
      * Invoke the callback methods in this executor when process response.
      */
     private ExecutorService callbackExecutor;
-
     private DefaultEventExecutorGroup defaultEventExecutorGroup;
-
-    private final List<ChannelHandler> customerFirstChannelHandlerList = new ArrayList<>();
-    private final List<ChannelHandler> customerLastChannelHandlerList = new ArrayList<>();
 
     public NettyRemotingClient(final NettyClientConfig nettyClientConfig) {
         super(nettyClientConfig.getClientOnewaySemaphoreValue(), nettyClientConfig.getClientAsyncSemaphoreValue());

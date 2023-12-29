@@ -1,10 +1,9 @@
-package test.io;
+package test;
 
 import haidnor.remoting.core.NettyClientConfig;
 import haidnor.remoting.core.NettyRemotingClient;
 import haidnor.remoting.protocol.RemotingCommand;
 import lombok.SneakyThrows;
-import test.server.Command;
 
 import java.nio.charset.StandardCharsets;
 

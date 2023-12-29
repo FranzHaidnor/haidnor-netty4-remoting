@@ -96,6 +96,52 @@ public class RemotingCommand {
         return cmd;
     }
 
+    public static RemotingCommand decode(final ByteBuffer buffer) {
+        RemotingCommand command = new RemotingCommand();
+
+        // 4 > 具体的指令字符串哈希码
+        int commandHashCode = buffer.getInt();
+        command.setCommandHashCode(commandHashCode);
+
+        // 4 > 响应码
+        int code = buffer.getInt();
+        command.setResponseCode(code);
+
+        // 4 > 类型 0:请求 1:响应
+        int rpcType = buffer.getInt();
+        command.setRpcType(rpcType);
+
+        // 4 > 是否为单向发送的类型 0:不是 1:是
+        int rpcOneway = buffer.getInt();
+        command.setRpcOneway(rpcOneway);
+
+        // 4 > 请求的唯一 id
+        int opaque = buffer.getInt();
+        command.setOpaque(opaque);
+
+        // 4 > 备注文本内容长度
+        int remarkLength = buffer.getInt();
+
+        // 若干字节 > 备注文本内容
+        if (remarkLength != 0) {
+            byte[] remark = new byte[remarkLength];
+            buffer.get(remark);
+            command.setRemark(new String(remark, StandardCharsets.UTF_8));
+        }
+
+        // 4 > 消息体长度
+        int bodyLength = buffer.getInt();
+
+        // 若干字节 > 消息体内容
+        if (bodyLength != 0) {
+            byte[] body = new byte[bodyLength];
+            buffer.get(body);
+            command.setBody(body);
+        }
+
+        return command;
+    }
+
     public ByteBuffer encode() {
         byte[] remarkBytes = null;
         if (remark != null) {
@@ -142,54 +188,8 @@ public class RemotingCommand {
         }
 
         // https://stackoverflow.com/questions/61267495/exception-in-thread-main-java-lang-nosuchmethoderror-java-nio-bytebuffer-flip
-        ((Buffer)buffer).flip();
+        ((Buffer) buffer).flip();
         return buffer;
-    }
-
-    public static RemotingCommand decode(final ByteBuffer buffer) {
-        RemotingCommand command = new RemotingCommand();
-
-        // 4 > 具体的指令字符串哈希码
-        int commandHashCode = buffer.getInt();
-        command.setCommandHashCode(commandHashCode);
-
-        // 4 > 响应码
-        int code = buffer.getInt();
-        command.setResponseCode(code);
-
-        // 4 > 类型 0:请求 1:响应
-        int rpcType = buffer.getInt();
-        command.setRpcType(rpcType);
-
-        // 4 > 是否为单向发送的类型 0:不是 1:是
-        int rpcOneway = buffer.getInt();
-        command.setRpcOneway(rpcOneway);
-
-        // 4 > 请求的唯一 id
-        int opaque = buffer.getInt();
-        command.setOpaque(opaque);
-
-        // 4 > 备注文本内容长度
-        int remarkLength = buffer.getInt();
-
-        // 若干字节 > 备注文本内容
-        if (remarkLength != 0) {
-            byte[] remark = new byte[remarkLength];
-            buffer.get(remark);
-            command.setRemark(new String(remark, StandardCharsets.UTF_8));
-        }
-
-        // 4 > 消息体长度
-        int bodyLength = buffer.getInt();
-
-        // 若干字节 > 消息体内容
-        if (bodyLength != 0) {
-            byte[] body = new byte[bodyLength];
-            buffer.get(body);
-            command.setBody(body);
-        }
-
-        return command;
     }
 
     public void markResponseType() {

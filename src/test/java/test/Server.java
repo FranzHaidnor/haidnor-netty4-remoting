@@ -1,14 +1,11 @@
-package test.io;
+package test;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import haidnor.remoting.core.NettyRemotingServer;
 import haidnor.remoting.core.NettyRequestProcessor;
 import haidnor.remoting.core.NettyServerConfig;
 import haidnor.remoting.protocol.RemotingCommand;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
-import test.server.Command;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
@@ -29,8 +26,7 @@ public class Server {
             @Override
             public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws Exception {
                 log.info("服务端接收到了消息-------------------------{}", request.getOpaque());
-                String log = IoUtil.readUtf8(FileUtil.getInputStream("D:\\log\\vip\\2023-11-02\\error-log.log"));
-                return RemotingCommand.createResponse(0, "okk!", log.getBytes(StandardCharsets.UTF_8));
+                return RemotingCommand.createResponse(0, "ok!", "XXXXXXXXXX".getBytes(StandardCharsets.UTF_8));
             }
         }, executorService);
 

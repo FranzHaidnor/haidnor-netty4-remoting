@@ -1,4 +1,4 @@
-package test.server;
+package test;
 
 public enum Command {
     GET_SERVER_INFO
