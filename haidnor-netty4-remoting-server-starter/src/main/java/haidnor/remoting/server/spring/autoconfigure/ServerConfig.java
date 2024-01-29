@@ -1,10 +1,13 @@
-package haidnor.remoting.spring.autoconfigure;
+package haidnor.remoting.server.spring.autoconfigure;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ServerConfig {
+
+    @Value("${haidnor.netty4.remoting.server.processorThreads:2}")
+    private int processorThreads = 2;
 
     @Value("${haidnor.netty4.remoting.server.listenPort:8080}")
     private int listenPort = 8080;
@@ -187,5 +190,13 @@ public class ServerConfig {
 
     public void setUseEpollNativeSelector(boolean useEpollNativeSelector) {
         this.useEpollNativeSelector = useEpollNativeSelector;
+    }
+
+    public int getProcessorThreads() {
+        return processorThreads;
+    }
+
+    public void setProcessorThreads(int processorThreads) {
+        this.processorThreads = processorThreads;
     }
 }

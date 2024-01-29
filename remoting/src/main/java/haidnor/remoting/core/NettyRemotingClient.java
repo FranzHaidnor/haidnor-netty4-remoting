@@ -484,14 +484,14 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     }
 
     @Override
-    public <T extends Enum<T>> void registerProcessor(T command, NettyRequestProcessor processor, ExecutorService executor) {
+    public void registerProcessor(String command, NettyRequestProcessor processor, ExecutorService executor) {
         ExecutorService executorThis = executor;
         if (null == executor) {
             executorThis = this.publicExecutor;
         }
 
         Pair<NettyRequestProcessor, ExecutorService> pair = new Pair<NettyRequestProcessor, ExecutorService>(processor, executorThis);
-        this.processorTable.put(command.name().hashCode(), pair);
+        this.processorTable.put(command.hashCode(), pair);
     }
 
     @Override

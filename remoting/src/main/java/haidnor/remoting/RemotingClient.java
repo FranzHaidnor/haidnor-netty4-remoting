@@ -25,7 +25,7 @@ public interface RemotingClient extends RemotingService {
      * 注册请求处理器
      * 将处理器放入 HashMap<Integer, Pair<NettyRequestProcessor, ExecutorService>> processorTable 中
      */
-    <T extends Enum<T>> void registerProcessor(T commandEnum, final NettyRequestProcessor processor, final ExecutorService executor);
+    void registerProcessor(String command, final NettyRequestProcessor processor, final ExecutorService executor);
 
     ExecutorService getCallbackExecutor();
 

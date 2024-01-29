@@ -107,11 +107,11 @@ public class RemotingCommand {
         return cmd;
     }
 
-    public static RemotingCommand createJsonProtocoResponse(int responseCode, Object body) {
+    public static RemotingCommand createJsonProtocolResponse(int responseCode, Object body) {
         return createResponse(responseCode, null, Jackson.toJsonBytes(body));
     }
 
-    public static RemotingCommand createJsonProtocoResponse(int responseCode, String remark, Object body) {
+    public static RemotingCommand createJsonProtocolResponse(int responseCode, String remark, Object body) {
         return createResponse(responseCode, remark, Jackson.toJsonBytes(body));
     }
 

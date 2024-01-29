@@ -1,4 +1,4 @@
-package haidnor.remoting.spring.autoconfigure;
+package haidnor.remoting.client.spring.autoconfigure;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -7,8 +7,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = {"haidnor.remoting.spring"}, nameGenerator = HaidnorNetty4RemotingAutoConfiguration.UniqueNameGenerator.class)
-public class HaidnorNetty4RemotingAutoConfiguration {
+@ComponentScan(basePackages = {"haidnor.remoting.client.spring"}, nameGenerator = AutoConfiguration.UniqueNameGenerator.class)
+public class AutoConfiguration {
 
     static class UniqueNameGenerator extends AnnotationBeanNameGenerator {
         @Override

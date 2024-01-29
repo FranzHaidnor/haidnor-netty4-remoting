@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  haidnor.remoting.server.spring.autoconfigure.AutoConfiguration
+  haidnor.remoting.client.spring.autoconfigure.AutoConfiguration

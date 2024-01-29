@@ -1,11 +1,11 @@
-package haidnor.remoting.spring;
+package haidnor.remoting.server.spring;
 
+import haidnor.remoting.client.spring.common.annotation.NettyRemotingRequestProcessor;
+import haidnor.remoting.client.spring.common.util.CommandRegistrar;
 import haidnor.remoting.core.NettyRemotingServer;
 import haidnor.remoting.core.NettyServerConfig;
 import haidnor.remoting.core.processor.NettyRequestProcessor;
-import haidnor.remoting.spring.annotation.NettyRemotingRequestProcessor;
-import haidnor.remoting.spring.autoconfigure.ServerConfig;
-import haidnor.remoting.spring.util.CommandRegistrar;
+import haidnor.remoting.server.spring.autoconfigure.ServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -36,7 +36,7 @@ public class NettyServerStartup implements ApplicationRunner {
         BeanUtils.copyProperties(config, nettyConfig);
         NettyRemotingServer server = new NettyRemotingServer(nettyConfig);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(nettyConfig.getServerProcessorMaxThreads());
+        ExecutorService executorService = Executors.newFixedThreadPool(config.getProcessorThreads());
 
         String[] processorBeanNames = applicationContext.getBeanNamesForAnnotation(NettyRemotingRequestProcessor.class);
         CommandRegistrar commandRegistrar = new CommandRegistrar();
@@ -50,6 +50,7 @@ public class NettyServerStartup implements ApplicationRunner {
             assert processor != null;
             commandRegistrar.register(processor.value());
             server.registerProcessor(processor.value(), (NettyRequestProcessor) bean, executorService);
+            log.debug("register netty remoting request processor {} , command {}", processor.value(), processor.value());
         }
 
         // 钩子
@@ -59,6 +60,7 @@ public class NettyServerStartup implements ApplicationRunner {
 //        server.registerChannelEventListener();
 
         server.start();
+        log.info("Netty Remoting Server Start! Listen Port: {}", config.getListenPort());
     }
 
 }

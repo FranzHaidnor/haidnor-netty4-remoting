@@ -1,10 +1,10 @@
-package haidnor.remoting.spring.annotation;
+package haidnor.remoting.client.spring.common.annotation;
 
 import java.lang.annotation.*;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface NettyRemotingChannelEventListener {
+public @interface NettyRemotingRPCHook {
 
 }

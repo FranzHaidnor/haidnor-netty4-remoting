@@ -1,4 +1,4 @@
-package haidnor.remoting.spring.util;
+package haidnor.remoting.client.spring.common.util;
 
 import java.util.HashSet;
 import java.util.Set;

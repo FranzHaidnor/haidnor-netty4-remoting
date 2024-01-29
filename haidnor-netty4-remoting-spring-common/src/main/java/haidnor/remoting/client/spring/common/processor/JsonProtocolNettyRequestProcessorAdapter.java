@@ -1,4 +1,4 @@
-package haidnor.remoting.spring.processor;
+package haidnor.remoting.client.spring.common.processor;
 
 import haidnor.remoting.core.processor.NettyRequestProcessor;
 import haidnor.remoting.protocol.RemotingCommand;
@@ -28,10 +28,10 @@ public abstract class JsonProtocolNettyRequestProcessorAdapter<T> implements Net
             if (result == null) {
                 return RemotingCommand.createResponse(RemotingSysResponseCode.SUCCESS);
             } else {
-                return RemotingCommand.createJsonProtocoResponse(RemotingSysResponseCode.SUCCESS, Jackson.toJsonBytes(result));
+                return RemotingCommand.createJsonProtocolResponse(RemotingSysResponseCode.SUCCESS, result);
             }
         } catch (Exception exception) {
-            return RemotingCommand.createJsonProtocoResponse(RemotingSysResponseCode.SYSTEM_ERROR, exception.getMessage());
+            return RemotingCommand.createJsonProtocolResponse(RemotingSysResponseCode.SYSTEM_ERROR, exception.getMessage());
         }
     }
 

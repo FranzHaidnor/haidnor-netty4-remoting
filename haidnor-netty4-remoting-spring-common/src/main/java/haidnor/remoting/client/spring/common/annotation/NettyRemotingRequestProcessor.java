@@ -1,4 +1,4 @@
-package haidnor.remoting.spring.annotation;
+package haidnor.remoting.client.spring.common.annotation;
 
 import java.lang.annotation.*;
 
