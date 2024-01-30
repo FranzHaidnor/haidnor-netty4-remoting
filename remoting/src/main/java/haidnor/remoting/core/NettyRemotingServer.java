@@ -172,8 +172,11 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                         ch.pipeline()
                                 // InboundHandler
                                 .addLast(defaultEventExecutorGroup, HANDSHAKE_HANDLER_NAME, handshakeHandler)
-                                // DuplexHandler 连接空闲检测处理器 120s 没有读写将会被触发
-                                .addLast(defaultEventExecutorGroup, new IdleStateHandler(serverConfig.getServerChannelMaxReaderIdleTimeSeconds(), serverConfig.getServerChannelMaxWriterIdleTimeSeconds(), serverConfig.getServerChannelMaxAllIdleTimeSeconds()))
+                                // DuplexHandler 连接空闲检测处理器
+                                .addLast(defaultEventExecutorGroup, new IdleStateHandler(
+                                        serverConfig.getServerChannelMaxReaderIdleTimeSeconds(),
+                                        serverConfig.getServerChannelMaxWriterIdleTimeSeconds(),
+                                        serverConfig.getServerChannelMaxAllIdleTimeSeconds()))
                                 .addLast(defaultEventExecutorGroup, connectionManageHandler)
                                 // OutboundHandler 编码器
                                 .addLast(defaultEventExecutorGroup, nettyEncoder)

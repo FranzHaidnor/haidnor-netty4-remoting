@@ -1,4 +1,4 @@
-package haidnor.remoting.server.spring;
+package haidnor.remoting.client.spring.autoconfigure;
 
 import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.RPCHook;
@@ -6,16 +6,12 @@ import haidnor.remoting.client.spring.common.annotation.NettyRemotingChannelEven
 import haidnor.remoting.client.spring.common.annotation.NettyRemotingRPCHook;
 import haidnor.remoting.client.spring.common.annotation.NettyRemotingRequestProcessor;
 import haidnor.remoting.client.spring.common.util.CommandRegistrar;
-import haidnor.remoting.core.NettyRemotingServer;
-import haidnor.remoting.core.NettyServerConfig;
+import haidnor.remoting.core.NettyClientConfig;
+import haidnor.remoting.core.NettyRemotingClient;
 import haidnor.remoting.core.processor.NettyRequestProcessor;
-import haidnor.remoting.server.spring.autoconfigure.ServerConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
@@ -29,26 +25,22 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Component
-public class NettyServerStartup implements ApplicationRunner {
-
-    private static final Logger log = LoggerFactory.getLogger(NettyServerStartup.class);
-
-    @Autowired
-    private ServerConfig config;
+public class NettyRemotingClientFactoryBean implements FactoryBean<NettyRemotingClient> {
 
     @Autowired
     private ApplicationContext applicationContext;
 
-    @Override
-    public void run(ApplicationArguments args) {
-        NettyServerConfig nettyServerConfig = new NettyServerConfig();
-        BeanUtils.copyProperties(config, nettyServerConfig);
-        NettyRemotingServer server = new NettyRemotingServer(nettyServerConfig);
+    @Autowired
+    private ClientConfig config;
 
+    @Override
+    public NettyRemotingClient getObject() {
+        NettyClientConfig nettyClientConfig = new NettyClientConfig();
+        BeanUtils.copyProperties(config, nettyClientConfig);
+        NettyRemotingClient client = new NettyRemotingClient(nettyClientConfig);
         ExecutorService executorService = Executors.newFixedThreadPool(config.getProcessorThreads());
 
         // NettyRequestProcessor ---------------------------------------------------------------------------------------
-
         String[] processorBeanNames = applicationContext.getBeanNamesForAnnotation(NettyRemotingRequestProcessor.class);
         CommandRegistrar commandRegistrar = new CommandRegistrar();
         for (String beanName : processorBeanNames) {
@@ -60,8 +52,7 @@ public class NettyServerStartup implements ApplicationRunner {
 
             assert processor != null;
             commandRegistrar.register(processor.value());
-            server.registerProcessor(processor.value(), (NettyRequestProcessor) bean, executorService);
-            log.debug("register netty remoting request processor {} , command {}", processor.value(), processor.value());
+            client.registerProcessor(processor.value(), (NettyRequestProcessor) bean, executorService);
         }
 
         // RPCHook -----------------------------------------------------------------------------------------------------
@@ -79,7 +70,7 @@ public class NettyServerStartup implements ApplicationRunner {
                 .collect(Collectors.toList());
 
         for (RPCHook rpcHook : rpcHookList) {
-            server.registerRPCHook(rpcHook);
+            client.registerRPCHook(rpcHook);
         }
 
         // ChannelEventListener ----------------------------------------------------------------------------------------
@@ -89,13 +80,18 @@ public class NettyServerStartup implements ApplicationRunner {
             if (!(bean instanceof ChannelEventListener)) {
                 throw new RuntimeException(beanName.getClass() + " is not of type ChannelEventListener");
             }
-            if (server.getChannelEventListener() != null) {
+            if (client.getChannelEventListener() != null) {
                 throw new RuntimeException("ChannelEventListener is already registered");
             }
-            server.registerChannelEventListener((ChannelEventListener) bean);
+            client.registerChannelEventListener((ChannelEventListener) bean);
         }
 
-        server.start();
+        return client;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return NettyRemotingClient.class;
     }
 
 }

@@ -1,0 +1,17 @@
+haidnor-netty4-remoting-server:
+  processorThreads: 4
+  listenPort: 8080
+  serverWorkerThreads: 8
+  serverCallbackExecutorThreads: 0
+  serverSelectorThreads: 3
+  serverOnewaySemaphoreValue: 256
+  serverAsyncSemaphoreValue: 64
+  timeoutMillis: 5000
+  serverChannelMaxReaderIdleTimeSeconds: 0
+  serverChannelMaxWriterIdleTimeSeconds: 0
+  serverChannelMaxAllIdleTimeSeconds: 0
+  serverSocketSndBufSize: 65535
+  serverSocketRcvBufSize: 65535
+  frameMaxLength: 16777216
+  serverPooledByteBufAllocatorEnable: true
+  useEpollNativeSelector: false

@@ -131,7 +131,7 @@ public abstract class NettyRemotingAbstract {
     }
 
     protected void doBeforeRpcHooks(String addr, RemotingCommand request) {
-        if (rpcHooks.size() > 0) {
+        if (!rpcHooks.isEmpty()) {
             for (RPCHook rpcHook : rpcHooks) {
                 rpcHook.doBeforeRequest(addr, request);
             }
@@ -139,7 +139,7 @@ public abstract class NettyRemotingAbstract {
     }
 
     protected void doAfterRpcHooks(String addr, RemotingCommand request, RemotingCommand response) {
-        if (rpcHooks.size() > 0) {
+        if (!rpcHooks.isEmpty()) {
             for (RPCHook rpcHook : rpcHooks) {
                 rpcHook.doAfterResponse(addr, request, response);
             }
@@ -324,7 +324,7 @@ public abstract class NettyRemotingAbstract {
      */
     @Deprecated
     protected RPCHook getRPCHook() {
-        if (rpcHooks.size() > 0) {
+        if (!rpcHooks.isEmpty()) {
             return rpcHooks.get(0);
         }
         return null;

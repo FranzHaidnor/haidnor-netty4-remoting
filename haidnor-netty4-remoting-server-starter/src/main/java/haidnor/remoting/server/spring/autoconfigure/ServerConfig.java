@@ -6,61 +6,60 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServerConfig {
 
-    @Value("${haidnor.netty4.remoting.server.processorThreads:2}")
+    @Value("${haidnor-netty4-remoting-server.processorThreads:2}")
     private int processorThreads = 2;
 
-    @Value("${haidnor.netty4.remoting.server.listenPort:8080}")
+    @Value("${haidnor-netty4-remoting-server.listenPort:8080}")
     private int listenPort = 8080;
 
-    @Value("${haidnor.netty4.remoting.server.serverWorkerThreads:8}")
+    @Value("${haidnor-netty4-remoting-server.serverWorkerThreads:8}")
     private int serverWorkerThreads = 8;
 
-    @Value("${haidnor.netty4.remoting.server.serverCallbackExecutorThreads:0}")
+    @Value("${haidnor-netty4-remoting-server.serverCallbackExecutorThreads:0}")
     private int serverCallbackExecutorThreads = 0;
 
-    @Value("${haidnor.netty4.remoting.server.serverSelectorThreads:3}")
+    @Value("${haidnor-netty4-remoting-server.serverSelectorThreads:3}")
     private int serverSelectorThreads = 3;
 
-    @Value("${haidnor.netty4.remoting.server.serverOnewaySemaphoreValue:256}")
+    @Value("${haidnor-netty4-remoting-server.serverOnewaySemaphoreValue:256}")
     private int serverOnewaySemaphoreValue = 256;
 
-    @Value("${haidnor.netty4.remoting.server.serverAsyncSemaphoreValue:64}")
+    @Value("${haidnor-netty4-remoting-server.serverAsyncSemaphoreValue:64}")
     private int serverAsyncSemaphoreValue = 64;
 
-    @Value("${haidnor.netty4.remoting.server.timeoutMillis:5000}")
+    @Value("${haidnor-netty4-remoting-server.timeoutMillis:5000}")
     private long timeoutMillis = 5000;
+    /**
+     * IdleStateEvent will be triggered when neither read nor write was performed for
+     * the specified period of this time. Specify {@code 0} to disable
+     */
+    @Value("${haidnor-netty4-remoting-server.serverChannelMaxReaderIdleTimeSeconds:0}")
+    private int serverChannelMaxReaderIdleTimeSecondsserverChannelMaxReaderIdleTimeSeconds = 0;
 
     /**
      * IdleStateEvent will be triggered when neither read nor write was performed for
      * the specified period of this time. Specify {@code 0} to disable
      */
-    @Value("${haidnor.netty4.remoting.server.serverChannelMaxReaderIdleTimeSeconds:0}")
-    private int serverChannelMaxReaderIdleTimeSeconds = 0;
-
-    /**
-     * IdleStateEvent will be triggered when neither read nor write was performed for
-     * the specified period of this time. Specify {@code 0} to disable
-     */
-    @Value("${haidnor.netty4.remoting.server.serverChannelMaxWriterIdleTimeSeconds:0}")
+    @Value("${haidnor-netty4-remoting-server.serverChannelMaxWriterIdleTimeSeconds:0}")
     private int serverChannelMaxWriterIdleTimeSeconds = 0;
 
     /**
      * IdleStateEvent will be triggered when neither read nor write was performed for
      * the specified period of this time. Specify {@code 0} to disable
      */
-    @Value("${haidnor.netty4.remoting.server.serverChannelMaxAllIdleTimeSeconds:0}")
+    @Value("${haidnor-netty4-remoting-server.serverChannelMaxAllIdleTimeSeconds:0}")
     private int serverChannelMaxAllIdleTimeSeconds = 0;
 
-    @Value("${haidnor.netty4.remoting.server.serverSocketSndBufSize:65535}")
+    @Value("${haidnor-netty4-remoting-server.serverSocketSndBufSize:65535}")
     private int serverSocketSndBufSize = 65535;
 
-    @Value("${haidnor.netty4.remoting.server.serverSocketRcvBufSize:65535}")
+    @Value("${haidnor-netty4-remoting-server.serverSocketRcvBufSize:65535}")
     private int serverSocketRcvBufSize = 65535;
 
-    @Value("${haidnor.netty4.remoting.server.frameMaxLength:16777216}")
+    @Value("${haidnor-netty4-remoting-server.frameMaxLength:16777216}")
     private int frameMaxLength = 16777216;
 
-    @Value("${haidnor.netty4.remoting.server.serverPooledByteBufAllocatorEnable:true}")
+    @Value("${haidnor-netty4-remoting-server.serverPooledByteBufAllocatorEnable:true}")
     private boolean serverPooledByteBufAllocatorEnable = true;
 
     /**
@@ -69,8 +68,16 @@ public class ServerConfig {
      * ../glibc-2.10.1/configure \ --prefix=/usr \ --with-headers=/usr/include \
      * --host=x86_64-linux-gnu \ --build=x86_64-pc-linux-gnu \ --without-gd
      */
-    @Value("${haidnor.netty4.remoting.server.useEpollNativeSelector:false}")
+    @Value("${haidnor-netty4-remoting-server.useEpollNativeSelector:false}")
     private boolean useEpollNativeSelector = false;
+
+    public int getProcessorThreads() {
+        return processorThreads;
+    }
+
+    public void setProcessorThreads(int processorThreads) {
+        this.processorThreads = processorThreads;
+    }
 
     public int getListenPort() {
         return listenPort;
@@ -128,12 +135,12 @@ public class ServerConfig {
         this.timeoutMillis = timeoutMillis;
     }
 
-    public int getServerChannelMaxReaderIdleTimeSeconds() {
-        return serverChannelMaxReaderIdleTimeSeconds;
+    public int getServerChannelMaxReaderIdleTimeSecondsserverChannelMaxReaderIdleTimeSeconds() {
+        return serverChannelMaxReaderIdleTimeSecondsserverChannelMaxReaderIdleTimeSeconds;
     }
 
-    public void setServerChannelMaxReaderIdleTimeSeconds(int serverChannelMaxReaderIdleTimeSeconds) {
-        this.serverChannelMaxReaderIdleTimeSeconds = serverChannelMaxReaderIdleTimeSeconds;
+    public void setServerChannelMaxReaderIdleTimeSecondsserverChannelMaxReaderIdleTimeSeconds(int serverChannelMaxReaderIdleTimeSecondsserverChannelMaxReaderIdleTimeSeconds) {
+        this.serverChannelMaxReaderIdleTimeSecondsserverChannelMaxReaderIdleTimeSeconds = serverChannelMaxReaderIdleTimeSecondsserverChannelMaxReaderIdleTimeSeconds;
     }
 
     public int getServerChannelMaxWriterIdleTimeSeconds() {
@@ -190,13 +197,5 @@ public class ServerConfig {
 
     public void setUseEpollNativeSelector(boolean useEpollNativeSelector) {
         this.useEpollNativeSelector = useEpollNativeSelector;
-    }
-
-    public int getProcessorThreads() {
-        return processorThreads;
-    }
-
-    public void setProcessorThreads(int processorThreads) {
-        this.processorThreads = processorThreads;
     }
 }
