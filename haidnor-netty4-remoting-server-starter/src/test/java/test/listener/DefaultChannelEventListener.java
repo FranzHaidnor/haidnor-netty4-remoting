@@ -2,6 +2,7 @@ package test.listener;
 
 import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.client.spring.common.annotation.NettyRemotingChannelEventListener;
+import haidnor.remoting.util.RemotingUtil;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,47 +16,48 @@ public class DefaultChannelEventListener implements ChannelEventListener {
 
     @Override
     public void onOutBoundConnect(String remoteAddr, Channel channel) {
-        ChannelEventListener.super.onOutBoundConnect(remoteAddr, channel);
+        log.info("onOutBoundConnect");
     }
 
     @Override
     public void onOutBoundDisconnect(String remoteAddr, Channel channel) {
-        ChannelEventListener.super.onOutBoundDisconnect(remoteAddr, channel);
+        log.info("onOutBoundDisconnect");
     }
 
     @Override
     public void onOutBoundClose(String remoteAddr, Channel channel) {
-        ChannelEventListener.super.onOutBoundClose(remoteAddr, channel);
+        log.info("onOutBoundClose");
     }
 
     @Override
     public void onInBoundActive(String remoteAddr, Channel channel) {
-        ChannelEventListener.super.onInBoundActive(remoteAddr, channel);
+        log.info("onInBoundActive");
+        RemotingUtil.closeChannel(channel);
     }
 
     @Override
     public void onInBoundInactive(String remoteAddr, Channel channel) {
-        ChannelEventListener.super.onInBoundInactive(remoteAddr, channel);
+        log.info("onInBoundInactive");
     }
 
     @Override
     public void onInBoundExceptionCaught(String remoteAddr, Channel channel) {
-        ChannelEventListener.super.onInBoundExceptionCaught(remoteAddr, channel);
+        log.info("onInBoundExceptionCaught");
     }
 
     @Override
     public void onInBoundReaderIdle(String remoteAddr, Channel channel) {
-        ChannelEventListener.super.onInBoundReaderIdle(remoteAddr, channel);
+        log.info("onInBoundReaderIdle");
     }
 
     @Override
     public void onInBoundWriterIdle(String remoteAddr, Channel channel) {
-        ChannelEventListener.super.onInBoundWriterIdle(remoteAddr, channel);
+        log.info("onInBoundWriterIdle");
     }
 
     @Override
     public void onInBoundAllIdle(String remoteAddr, Channel channel) {
-        ChannelEventListener.super.onInBoundAllIdle(remoteAddr, channel);
+        log.info("onInBoundAllIdle");
     }
 
 }

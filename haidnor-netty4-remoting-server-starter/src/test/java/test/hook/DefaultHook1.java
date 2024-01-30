@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @NettyRemotingRPCHook(order = -1)
-@Component
+//@Component
 public class DefaultHook1 implements RPCHook {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultHook1.class);

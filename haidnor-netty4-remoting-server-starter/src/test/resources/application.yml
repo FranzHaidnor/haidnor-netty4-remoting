@@ -1,17 +1,33 @@
 haidnor-netty4-remoting-server:
-  processorThreads: 4
+  # 业务处理器线程池线程数量, 默认值: 2
+  processorThreads: 2
+  # 服务器监听端口. 默认值: 8080
   listenPort: 8080
+  # Netty 事件处理线程池线程数量. 默认值: 8
   serverWorkerThreads: 8
+  # 业务回调处理线程池线程数量.如果设置小于等于 0 则默认值等于 4
   serverCallbackExecutorThreads: 0
-  serverSelectorThreads: 3
+  # Netty 处理 Selector 事件线程池线程数量. 默认值: 4
+  serverSelectorThreads: 4
+  # Oneway 模式请求的并发数量. 默认值: 256
   serverOnewaySemaphoreValue: 256
+  # Async 模式请求的并发数量. 默认值: 256
   serverAsyncSemaphoreValue: 64
+  # 向客户端发送请求的默认超时时间. 默认值: 5000 (MS)
   timeoutMillis: 5000
-  serverChannelMaxReaderIdleTimeSeconds: 0
-  serverChannelMaxWriterIdleTimeSeconds: 0
-  serverChannelMaxAllIdleTimeSeconds: 0
-  serverSocketSndBufSize: 65535
-  serverSocketRcvBufSize: 65535
+  # socket 写缓冲区字节数. 默认值: 65536 (64KiB)
+  serverSocketSndBufSize: 65536
+  # socket 读缓冲区字节数. 默认值: 65536 (64KiB)
+  serverSocketRcvBufSize: 65536
+  # 限制接收消息帧的最大字节数. 默认值: 16777216 (16MiB)
   frameMaxLength: 16777216
+  # 是否启用池化 ByteBuf 分配器. 默认值 true
   serverPooledByteBufAllocatorEnable: true
+  # 是否启动 Epoll 模式的 Selector. 默认值: false
   useEpollNativeSelector: false
+  # 最大读空闲时间,值等于0则不会触发此事件. 默认值: 0
+  serverChannelMaxReaderIdleTimeSeconds: 0
+  # 最大写空闲时间,值等于0则不会触发此事件. 默认值: 0
+  serverChannelMaxWriterIdleTimeSeconds: 0
+  # 最大读写空闲时间,值等于0则不会触发此事件. 默认值: 0
+  serverChannelMaxAllIdleTimeSeconds: 0

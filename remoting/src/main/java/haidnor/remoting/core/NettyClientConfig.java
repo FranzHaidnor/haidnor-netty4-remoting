@@ -12,8 +12,8 @@ public class NettyClientConfig {
      */
     private int clientWorkerThreads = 4;
     private int clientCallbackExecutorThreads = Runtime.getRuntime().availableProcessors();
-    private int clientOnewaySemaphoreValue = 65535;
-    private int clientAsyncSemaphoreValue = 65535;
+    private int clientOnewaySemaphoreValue = 65536;
+    private int clientAsyncSemaphoreValue = 65536;
     private int connectTimeoutMillis = 3000;
     private long channelNotActiveInterval = 1000 * 60;
     private long timeoutMillis = 5000;
@@ -34,9 +34,9 @@ public class NettyClientConfig {
      */
     private int clientChannelMaxAllIdleTimeSeconds = 0;
 
-    private int clientSocketSndBufSize = 65535;
-    private int clientSocketRcvBufSize = 65535;
-    private int frameMaxLength = 65535;
+    private int clientSocketSndBufSize = 65536;
+    private int clientSocketRcvBufSize = 65536;
+    private int frameMaxLength = 65536;
     private boolean clientPooledByteBufAllocatorEnable = false;
     private boolean clientCloseSocketIfTimeout = true;
     private boolean useTLS;

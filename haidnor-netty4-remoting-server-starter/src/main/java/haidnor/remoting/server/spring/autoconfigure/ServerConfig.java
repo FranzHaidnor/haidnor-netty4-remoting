@@ -18,8 +18,8 @@ public class ServerConfig {
     @Value("${haidnor-netty4-remoting-server.serverCallbackExecutorThreads:0}")
     private int serverCallbackExecutorThreads = 0;
 
-    @Value("${haidnor-netty4-remoting-server.serverSelectorThreads:3}")
-    private int serverSelectorThreads = 3;
+    @Value("${haidnor-netty4-remoting-server.serverSelectorThreads:4}")
+    private int serverSelectorThreads = 4;
 
     @Value("${haidnor-netty4-remoting-server.serverOnewaySemaphoreValue:256}")
     private int serverOnewaySemaphoreValue = 256;
@@ -50,11 +50,11 @@ public class ServerConfig {
     @Value("${haidnor-netty4-remoting-server.serverChannelMaxAllIdleTimeSeconds:0}")
     private int serverChannelMaxAllIdleTimeSeconds = 0;
 
-    @Value("${haidnor-netty4-remoting-server.serverSocketSndBufSize:65535}")
-    private int serverSocketSndBufSize = 65535;
+    @Value("${haidnor-netty4-remoting-server.serverSocketSndBufSize:65536}")
+    private int serverSocketSndBufSize = 65536;
 
-    @Value("${haidnor-netty4-remoting-server.serverSocketRcvBufSize:65535}")
-    private int serverSocketRcvBufSize = 65535;
+    @Value("${haidnor-netty4-remoting-server.serverSocketRcvBufSize:65536}")
+    private int serverSocketRcvBufSize = 65536;
 
     @Value("${haidnor-netty4-remoting-server.frameMaxLength:16777216}")
     private int frameMaxLength = 16777216;

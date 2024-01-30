@@ -18,11 +18,11 @@ public class ClientConfig {
     @Value("${haidnor.netty4.remoting.client.clientCallbackExecutorThreads:4}")
     private int clientCallbackExecutorThreads;
 
-    @Value("${haidnor.netty4.remoting.client.clientOnewaySemaphoreValue:65535}")
-    private int clientOnewaySemaphoreValue = 65535;
+    @Value("${haidnor.netty4.remoting.client.clientOnewaySemaphoreValue:65536}")
+    private int clientOnewaySemaphoreValue = 65536;
 
-    @Value("${haidnor.netty4.remoting.client.clientAsyncSemaphoreValue:65535}")
-    private int clientAsyncSemaphoreValue = 65535;
+    @Value("${haidnor.netty4.remoting.client.clientAsyncSemaphoreValue:65536}")
+    private int clientAsyncSemaphoreValue = 65536;
 
     @Value("${haidnor.netty4.remoting.client.connectTimeoutMillis:3000}")
     private int connectTimeoutMillis = 3000;
@@ -54,14 +54,14 @@ public class ClientConfig {
     @Value("${haidnor.netty4.remoting.client.clientChannelMaxAllIdleTimeSeconds:0}")
     private int clientChannelMaxAllIdleTimeSeconds = 0;
 
-    @Value("${haidnor.netty4.remoting.client.clientSocketSndBufSize:65535}")
-    private int clientSocketSndBufSize = 65535;
+    @Value("${haidnor.netty4.remoting.client.clientSocketSndBufSize:65536}")
+    private int clientSocketSndBufSize = 65536;
 
-    @Value("${haidnor.netty4.remoting.client.clientSocketRcvBufSize:65535}")
-    private int clientSocketRcvBufSize = 65535;
+    @Value("${haidnor.netty4.remoting.client.clientSocketRcvBufSize:65536}")
+    private int clientSocketRcvBufSize = 65536;
 
-    @Value("${haidnor.netty4.remoting.client.frameMaxLength:65535}")
-    private int frameMaxLength = 65535;
+    @Value("${haidnor.netty4.remoting.client.frameMaxLength:65536}")
+    private int frameMaxLength = 65536;
 
     @Value("${haidnor.netty4.remoting.client.clientPooledByteBufAllocatorEnable:false}")
     private boolean clientPooledByteBufAllocatorEnable = false;
