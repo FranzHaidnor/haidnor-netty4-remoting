@@ -19,8 +19,10 @@ public class ApplicationStartup implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         RemotingCommand request = RemotingCommand.creatJsonProtocolRequest("/user/login", new User(1L, "888888ABC123456"));
         RemotingCommand response = client.invokeSync("127.0.0.1:8080", request);
-
         System.out.println(Jackson.toBean(response.getBody(),String.class));
+
+//        client.invokeOneway("127.0.0.1:8080", request);
+
     }
 
 }

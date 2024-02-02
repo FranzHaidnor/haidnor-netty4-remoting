@@ -9,9 +9,6 @@ public class ClientConfig {
     @Value("${haidnor.netty4.remoting.client.processorThreads:2}")
     private int processorThreads = 2;
 
-    /**
-     * Worker thread number
-     */
     @Value("${haidnor.netty4.remoting.client.clientWorkerThreads:4}")
     private int clientWorkerThreads = 4;
 

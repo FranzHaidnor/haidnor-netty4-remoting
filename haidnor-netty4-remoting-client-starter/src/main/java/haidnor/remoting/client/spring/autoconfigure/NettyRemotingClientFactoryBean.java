@@ -14,15 +14,14 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 @Component
 public class NettyRemotingClientFactoryBean implements FactoryBean<NettyRemotingClient> {
@@ -65,13 +64,13 @@ public class NettyRemotingClientFactoryBean implements FactoryBean<NettyRemoting
             }
             rpcHookList.add((RPCHook) bean);
         }
-        rpcHookList = rpcHookList.stream()
-                .sorted(Comparator.comparingInt(o -> Objects.requireNonNull(AnnotationUtils.findAnnotation(o.getClass(), NettyRemotingRPCHook.class)).order()))
-                .collect(Collectors.toList());
 
-        for (RPCHook rpcHook : rpcHookList) {
-            client.registerRPCHook(rpcHook);
-        }
+        rpcHookList.stream()
+                .sorted(Comparator.comparingInt(o -> {
+                    Order order = AnnotationUtils.findAnnotation(o.getClass(), Order.class);
+                    return order != null ? order.value() : Integer.MAX_VALUE;
+                }))
+                .forEach(client::registerRPCHook);
 
         // ChannelEventListener ----------------------------------------------------------------------------------------
         String[] eventListenerBeanNames = applicationContext.getBeanNamesForAnnotation(NettyRemotingChannelEventListener.class);

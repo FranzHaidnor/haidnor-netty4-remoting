@@ -5,9 +5,12 @@ import haidnor.remoting.client.spring.common.annotation.NettyRemotingRPCHook;
 import haidnor.remoting.protocol.RemotingCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 @NettyRemotingRPCHook
-//@Component
+@Component
+@Order(-1)
 public class DefaultHook implements RPCHook {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultHook.class);

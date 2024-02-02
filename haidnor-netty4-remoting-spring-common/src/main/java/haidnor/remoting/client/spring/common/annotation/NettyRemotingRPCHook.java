@@ -7,6 +7,4 @@ import java.lang.annotation.*;
 @Documented
 public @interface NettyRemotingRPCHook {
 
-    int order() default 0;
-
 }
