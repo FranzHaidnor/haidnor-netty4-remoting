@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -76,7 +77,7 @@ public class NettyRemotingServerFactoryBean implements FactoryBean<NettyRemoting
         rpcHookList.stream()
                 .sorted(Comparator.comparingInt(o -> {
                     Order order = AnnotationUtils.findAnnotation(o.getClass(), Order.class);
-                    return order != null ? order.value() : Integer.MAX_VALUE;
+                    return order != null ? order.value() : Ordered.LOWEST_PRECEDENCE;
                 }))
                 .forEach(server::registerRPCHook);
 
