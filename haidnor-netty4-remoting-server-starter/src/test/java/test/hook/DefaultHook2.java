@@ -11,10 +11,9 @@ import org.springframework.stereotype.Component;
 @NettyRemotingRPCHook
 @Component
 @Order(3)
-public class DefaultHook1 implements RPCHook {
+public class DefaultHook2 implements RPCHook {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultHook1.class);
-
+    private static final Logger log = LoggerFactory.getLogger(DefaultHook2.class);
 
     @Override
     public void doBeforeRequest(String remoteAddr, RemotingCommand request) {

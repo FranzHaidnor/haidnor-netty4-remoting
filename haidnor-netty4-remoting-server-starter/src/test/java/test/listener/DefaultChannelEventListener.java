@@ -2,7 +2,6 @@ package test.listener;
 
 import haidnor.remoting.ChannelEventListener;
 import haidnor.remoting.client.spring.common.annotation.NettyRemotingChannelEventListener;
-import haidnor.remoting.util.RemotingUtil;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,7 @@ public class DefaultChannelEventListener implements ChannelEventListener {
     @Override
     public void onInBoundActive(String remoteAddr, Channel channel) {
         log.info("onInBoundActive");
-        RemotingUtil.closeChannel(channel);
+//        RemotingUtil.closeChannel(channel);
     }
 
     @Override
